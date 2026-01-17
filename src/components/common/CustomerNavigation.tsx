@@ -94,14 +94,14 @@ const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
             className="flex items-center gap-3 transition-luxury hover:opacity-80"
             onClick={handleLinkClick}
           >
-            <div className="relative w-10 h-10 flex items-center justify-center">
+            <div className="relative w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
               <img
                 src="/images/logo.png"
                 alt="TrendyLuxeBag Logo"
                 className="w-full h-full object-contain"
               />
             </div>
-            <span className="font-heading text-2xl font-semibold text-foreground tracking-tight">
+            <span className="font-heading text-3xl md:text-4xl font-semibold text-foreground tracking-tight">
               TrendyLuxeBag
             </span>
           </Link>

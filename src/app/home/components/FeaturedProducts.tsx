@@ -1,4 +1,9 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
+import { collection, query, orderBy, limit, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface Product {
   id: string;
@@ -17,100 +22,134 @@ interface FeaturedProductsProps {
 }
 
 const FeaturedProducts = ({ className = '' }: FeaturedProductsProps) => {
-  const products: Product[] = [
-    {
-      id: 'prod-1',
-      name: 'Classic Leather Tote - Cognac Brown',
-      price: 289.00,
-      originalPrice: 399.00,
-      image: "https://images.unsplash.com/photo-1594633313593-bab3825d0caf",
-      alt: 'Premium cognac brown leather tote bag with structured silhouette and gold hardware details',
-      badge: 'Bestseller',
-      rating: 4.8,
-      reviewCount: 234
-    },
-    {
-      id: 'prod-2',
-      name: 'Minimalist Crossbody - Midnight Black',
-      price: 159.00,
-      image: "https://images.unsplash.com/photo-1620786514663-8c3f57ffe17c",
-      alt: 'Sleek midnight black crossbody bag with adjustable leather strap and minimalist design',
-      badge: 'New Arrival',
-      rating: 4.9,
-      reviewCount: 187
-    },
-    {
-      id: 'prod-3',
-      name: 'Structured Shoulder Bag - Camel',
-      price: 245.00,
-      originalPrice: 320.00,
-      image: "https://images.unsplash.com/photo-1564422170194-896b89110ef8",
-      alt: 'Elegant camel leather shoulder bag with structured shape and polished gold clasp',
-      rating: 4.7,
-      reviewCount: 156
-    },
-    {
-      id: 'prod-4',
-      name: 'Evening Clutch - Rose Gold',
-      price: 129.00,
-      image: "https://images.unsplash.com/photo-1575296020525-faff52f00d8c",
-      alt: 'Luxurious rose gold metallic clutch with chain strap and crystal embellishments',
-      badge: 'Limited Edition',
-      rating: 5.0,
-      reviewCount: 98
-    },
-    {
-      id: 'prod-5',
-      name: 'Convertible Backpack - Navy Blue',
-      price: 199.00,
-      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62",
-      alt: 'Versatile navy blue leather backpack with convertible straps and multiple compartments',
-      rating: 4.6,
-      reviewCount: 142
-    },
-    {
-      id: 'prod-6',
-      name: 'Weekender Travel Bag - Tan',
-      price: 349.00,
-      originalPrice: 450.00,
-      image: "https://images.unsplash.com/photo-1519144674309-fcb7fbc1a054",
-      alt: 'Spacious tan leather weekender bag with brass hardware and detachable shoulder strap',
-      badge: 'Sale',
-      rating: 4.8,
-      reviewCount: 203
-    }];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchLatestProducts = async () => {
+      try {
+        // Query latest products (filter in code to avoid index requirement)
+        const productsRef = collection(db, 'products');
+        const q = query(
+          productsRef,
+          orderBy('createdAt', 'desc'),
+          limit(3)
+        );
+
+        const querySnapshot = await getDocs(q);
+        console.log('📦 Fetched latest products:', querySnapshot.size);
+
+        const fetchedProducts = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          const discount = data.discount || 0;
+          const finalPrice = discount > 0
+            ? Math.round(data.price * (1 - discount / 100))
+            : data.price;
+
+          // Determine badge
+          let badge: string | undefined;
+          const tags = data.tags || {};
+          if (tags.isNew) badge = 'New Arrival';
+          else if (tags.isBestseller) badge = 'Bestseller';
+          else if (tags.isLimited) badge = 'Limited Edition';
+          else if (tags.isBestSale) badge = 'Best Sale';
+
+          return {
+            id: doc.id,
+            name: data.name,
+            price: finalPrice,
+            originalPrice: discount > 0 ? data.price : undefined,
+            image: data.images?.[0]?.url || 'https://images.unsplash.com/photo-1557156975-10facf485d07',
+            alt: data.images?.[0]?.alt || data.name,
+            badge,
+            rating: 4.8, // TODO: Add to schema
+            reviewCount: 0, // TODO: Add to schema
+          };
+        });
+
+        setProducts(fetchedProducts);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLatestProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className={`py-16 lg:py-24 bg-muted/30 ${className}`}>
+        <div className="max-w-[1920px] mx-auto px-6 lg:px-12">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Latest Collection
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="h-96 bg-background rounded-luxury animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <section className={`py-16 lg:py-24 bg-muted/30 ${className}`}>
+        <div className="max-w-[1920px] mx-auto px-6 lg:px-12">
+          <div className="text-center">
+            <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+              Latest Collection
+            </h2>
+            <p className="font-body text-lg text-muted-foreground">
+              No products available yet. Check back soon!
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className={`py-16 lg:py-24 bg-muted/30 ${className}`}>
       <div className="max-w-[1920px] mx-auto px-6 lg:px-12">
         <div className="text-center mb-12 lg:mb-16">
           <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Featured Collection
+            Featured Products
           </h2>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
-            Handpicked selections from our latest arrivals and customer favorites
+            Discover our newest arrivals - fresh styles added just for you
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {products.map((product) =>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {products.map((product) => (
             <ProductCard
               key={product.id}
               {...product}
-              href="/product-detail" />
-
-          )}
+              href={`/product-detail?id=${product.id}`}
+            />
+          ))}
         </div>
 
         <div className="text-center mt-12">
-          <button className="h-14 px-8 bg-accent text-accent-foreground rounded-luxury font-body text-base font-medium transition-spring hover:shadow-luxury active:scale-[0.97]">
+          <a
+            href="/product-listing"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-luxury font-body text-base font-medium transition-spring hover:shadow-luxury active:scale-[0.97]"
+          >
             View All Products
-          </button>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
         </div>
       </div>
-    </section>);
-
+    </section>
+  );
 };
 
 export default FeaturedProducts;

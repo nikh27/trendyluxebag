@@ -138,3 +138,27 @@ export const getProductsByCategory = async (category: string): Promise<Product[]
         return [];
     }
 };
+
+// Get all active categories
+export async function getActiveCategories() {
+    try {
+        const categoriesRef = collection(db, 'categories');
+        const q = query(categoriesRef, where('status', '==', 'active'));
+        const querySnapshot = await getDocs(q);
+
+        return querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        })) as Array<{
+            id: string;
+            name: string;
+            description?: string;
+            imageUrl?: string;
+            productCount?: number;
+            status: string;
+        }>;
+    } catch (error) {
+        console.error('Error fetching categories:', error);
+        return [];
+    }
+}
