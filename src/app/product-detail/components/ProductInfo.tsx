@@ -9,6 +9,12 @@ interface ProductInfoProps {
   description: string;
   highlights: string[];
   specifications: Array<{ label: string; value: string }>;
+  tags?: {
+    isNew?: boolean;
+    isBestseller?: boolean;
+    isLimited?: boolean;
+    isBestSale?: boolean;
+  };
 }
 
 const ProductInfo = ({
@@ -20,6 +26,7 @@ const ProductInfo = ({
   description,
   highlights,
   specifications,
+  tags,
 }: ProductInfoProps) => {
   const discount = originalPrice
     ? Math.round(((originalPrice - price) / originalPrice) * 100)
@@ -32,7 +39,7 @@ const ProductInfo = ({
         <h1 className="font-heading text-3xl lg:text-4xl font-semibold text-foreground mb-2">
           {name}
         </h1>
-        
+
         {/* Rating */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
@@ -55,12 +62,12 @@ const ProductInfo = ({
       {/* Price */}
       <div className="flex items-baseline gap-3">
         <span className="font-heading text-4xl font-semibold text-foreground">
-          ${price.toLocaleString()}
+          ₹{price.toLocaleString()}
         </span>
         {originalPrice && (
           <>
             <span className="font-body text-xl text-muted-foreground line-through">
-              ${originalPrice.toLocaleString()}
+              ₹{originalPrice.toLocaleString()}
             </span>
             <span className="px-3 py-1 bg-accent/10 text-accent rounded-full caption font-medium">
               {discount}% OFF
@@ -68,6 +75,32 @@ const ProductInfo = ({
           </>
         )}
       </div>
+
+      {/* Tags */}
+      {tags && (tags.isNew || tags.isBestseller || tags.isLimited || tags.isBestSale) && (
+        <div className="flex flex-wrap gap-2">
+          {tags.isNew && (
+            <span className="px-3 py-1 bg-primary/10 text-primary rounded-full caption font-medium">
+              New Arrival
+            </span>
+          )}
+          {tags.isBestseller && (
+            <span className="px-3 py-1 bg-success/10 text-success rounded-full caption font-medium">
+              Bestseller
+            </span>
+          )}
+          {tags.isLimited && (
+            <span className="px-3 py-1 bg-error/10 text-error rounded-full caption font-medium">
+              Limited Edition
+            </span>
+          )}
+          {tags.isBestSale && (
+            <span className="px-3 py-1 bg-accent/10 text-accent rounded-full caption font-medium">
+              Best Sale
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Description */}
       <div className="pt-4 border-t border-border">
@@ -107,21 +140,21 @@ const ProductInfo = ({
         </div>
       </div>
 
-      {/* Trust Badges */}
+      {/* Quality Assurance */}
       <div className="pt-4 border-t border-border">
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-3 p-4 bg-muted rounded-luxury">
-            <Icon name="TruckIcon" size={24} className="text-primary" />
+            <Icon name="CheckBadgeIcon" size={24} className="text-primary" />
             <div>
-              <div className="font-body text-sm font-medium">Free Shipping</div>
-              <div className="caption text-muted-foreground">On orders over $200</div>
+              <div className="font-body text-sm font-medium">Authentic Product</div>
+              <div className="caption text-muted-foreground">100% Genuine</div>
             </div>
           </div>
           <div className="flex items-center gap-3 p-4 bg-muted rounded-luxury">
-            <Icon name="ShieldCheckIcon" size={24} className="text-primary" />
+            <Icon name="StarIcon" variant="solid" size={24} className="text-accent" />
             <div>
-              <div className="font-body text-sm font-medium">Secure Payment</div>
-              <div className="caption text-muted-foreground">SSL encrypted</div>
+              <div className="font-body text-sm font-medium">Top Quality</div>
+              <div className="caption text-muted-foreground">Premium brands</div>
             </div>
           </div>
         </div>

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchFilter from '@/components/common/SearchFilter';
 import ProductCard from './ProductCard';
 import ProductSkeleton from './ProductSkeleton';
 import FilterSummary from './FilterSummary';
 import Icon from '@/components/ui/AppIcon';
+import { getAllProducts } from '@/services/productService';
 
 interface Product {
   id: string;
@@ -34,6 +35,7 @@ interface FilterState {
 const ProductListingInteractive = () => {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
   const [gridSize, setGridSize] = useState<'2-col' | '4-col'>('2-col');
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
@@ -43,156 +45,49 @@ const ProductListingInteractive = () => {
     tags: []
   });
 
+  // Fetch products from Firestore
   useEffect(() => {
-    setIsHydrated(true);
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
+    const loadProducts = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getAllProducts();
+
+        console.log('📦 Fetched products from Firestore:', data.length);
+
+        // Transform and filter active products
+        const transformedProducts = data
+          .filter(p => p.status === 'active')
+          .map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.discount ? Math.round(p.price * (1 - p.discount / 100)) : p.price,
+            originalPrice: p.discount ? p.price : undefined,
+            image: p.images[0]?.url || '',
+            alt: p.images[0]?.alt || p.name,
+            category: p.category,
+            isNew: p.tags?.isNew || p.isNew,
+            isBestseller: p.tags?.isBestseller || p.isBestseller,
+            isLimited: p.tags?.isLimited || p.isLimited,
+            isBestSale: p.tags?.isBestSale || p.isBestSale,
+            createdAt: p.createdAt,
+            popularity: 85 // TODO: Add to schema
+          }));
+
+        console.log('✅ Active products:', transformedProducts.length);
+        setProducts(transformedProducts);
+      } catch (error) {
+        console.error('❌ Error loading products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
   }, []);
 
-  const mockProducts: Product[] = [
-    {
-      id: '1',
-      name: 'Classic Leather Tote Bag',
-      price: 299.99,
-      originalPrice: 399.99,
-      image: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214",
-      alt: 'Brown leather tote bag with gold hardware on white background',
-      category: 'tote',
-      isNew: true,
-      isBestseller: true,
-      isBestSale: true,
-      createdAt: '2026-01-10',
-      popularity: 95
-    },
-    {
-      id: '2',
-      name: 'Evening Satin Clutch',
-      price: 149.99,
-      image: "https://images.unsplash.com/photo-1614522118808-bf3a6cd2e005",
-      alt: 'Black satin clutch with silver chain strap on marble surface',
-      category: 'clutch',
-      isBestseller: true,
-      createdAt: '2026-01-08',
-      popularity: 88
-    },
-    {
-      id: '3',
-      name: 'Crossbody Messenger Bag',
-      price: 189.99,
-      originalPrice: 249.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1ea9e9cac-1768007414365.png",
-      alt: 'Tan crossbody messenger bag with adjustable strap on wooden table',
-      category: 'crossbody',
-      isNew: true,
-      isBestSale: true,
-      createdAt: '2026-01-12',
-      popularity: 82
-    },
-    {
-      id: '4',
-      name: 'Luxury Shoulder Handbag',
-      price: 449.99,
-      image: "https://images.unsplash.com/photo-1641812746933-b1b8d2ac8ba9",
-      alt: 'Burgundy leather shoulder bag with gold chain detail',
-      category: 'shoulder',
-      isBestseller: true,
-      isLimited: true,
-      createdAt: '2026-01-05',
-      popularity: 91
-    },
-    {
-      id: '5',
-      name: 'Travel Backpack Premium',
-      price: 279.99,
-      originalPrice: 349.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_184181d74-1768150129371.png",
-      alt: 'Black leather backpack with multiple compartments on gray background',
-      category: 'backpack',
-      isNew: true,
-      createdAt: '2026-01-14',
-      popularity: 79
-    },
-    {
-      id: '6',
-      name: 'Mini Crossbody Purse',
-      price: 129.99,
-      image: "https://images.unsplash.com/photo-1617958008526-678b6353a092",
-      alt: 'Pink mini crossbody purse with gold chain on white surface',
-      category: 'crossbody',
-      createdAt: '2026-01-06',
-      popularity: 75
-    },
-    {
-      id: '7',
-      name: 'Designer Tote Collection',
-      price: 599.99,
-      image: "https://images.unsplash.com/photo-1680789526738-7fcfd4a093c9",
-      alt: 'Beige designer tote bag with leather handles and gold logo',
-      category: 'tote',
-      isBestseller: true,
-      isLimited: true,
-      createdAt: '2026-01-03',
-      popularity: 93
-    },
-    {
-      id: '8',
-      name: 'Crystal Evening Clutch',
-      price: 199.99,
-      originalPrice: 279.99,
-      image: "https://images.unsplash.com/photo-1608368553807-622b422ee2c0",
-      alt: 'Silver crystal-embellished evening clutch on black velvet',
-      category: 'clutch',
-      isNew: true,
-      isBestSale: true,
-      createdAt: '2026-01-15',
-      popularity: 86
-    },
-    {
-      id: '9',
-      name: 'Everyday Shoulder Bag',
-      price: 219.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_17143f34b-1767994862727.png",
-      alt: 'Navy blue shoulder bag with adjustable strap on wooden background',
-      category: 'shoulder',
-      createdAt: '2026-01-07',
-      popularity: 77
-    },
-    {
-      id: '10',
-      name: 'Urban Backpack Style',
-      price: 249.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_12367e09c-1766973296429.png",
-      alt: 'Gray urban backpack with laptop compartment on concrete floor',
-      category: 'backpack',
-      isNew: true,
-      createdAt: '2026-01-11',
-      popularity: 81
-    },
-    {
-      id: '11',
-      name: 'Vintage Leather Tote',
-      price: 379.99,
-      originalPrice: 479.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1ea9e9cac-1768007414365.png",
-      alt: 'Brown vintage leather tote with brass buckles on rustic table',
-      category: 'tote',
-      isBestseller: true,
-      isBestSale: true,
-      createdAt: '2026-01-04',
-      popularity: 89
-    },
-    {
-      id: '12',
-      name: 'Metallic Party Clutch',
-      price: 169.99,
-      image: "https://images.unsplash.com/photo-1630534592550-bc740a0c5704",
-      alt: 'Gold metallic party clutch with chain strap on pink background',
-      category: 'clutch',
-      isLimited: true,
-      createdAt: '2026-01-09',
-      popularity: 73
-    }];
-
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const filterProducts = (products: Product[]): Product[] => {
     let filtered = [...products];
@@ -293,7 +188,21 @@ const ProductListingInteractive = () => {
     setTimeout(() => setIsLoading(false), 400);
   };
 
-  const filteredProducts = filterProducts(mockProducts);
+  const filteredProducts = filterProducts(products);
+
+  // Generate categories from products
+  const categoryOptions = React.useMemo(() => {
+    const categoryCounts: Record<string, number> = {};
+    products.forEach(p => {
+      categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+    });
+
+    return Object.entries(categoryCounts).map(([id, count]) => ({
+      id,
+      label: id.charAt(0).toUpperCase() + id.slice(1),
+      count
+    }));
+  }, [products]);
 
   const getGridColumns = () => {
     switch (gridSize) {
@@ -331,7 +240,10 @@ const ProductListingInteractive = () => {
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Sidebar Filters */}
       <aside className="lg:w-80 flex-shrink-0">
-        <SearchFilter onFilterChange={handleFilterChange} />
+        <SearchFilter
+          onFilterChange={handleFilterChange}
+          categories={categoryOptions}
+        />
       </aside>
 
       {/* Main Content */}

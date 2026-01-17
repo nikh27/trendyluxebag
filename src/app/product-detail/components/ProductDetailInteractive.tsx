@@ -5,6 +5,8 @@ import ImageGallery from './ImageGallery';
 import ProductInfo from './ProductInfo';
 import ProductActions from './ProductActions';
 import RelatedProducts from './RelatedProducts';
+import Icon from '@/components/ui/AppIcon';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 interface Product {
   id: string;
@@ -17,6 +19,13 @@ interface Product {
   highlights: string[];
   specifications: Array<{ label: string; value: string }>;
   images: Array<{ url: string; alt: string }>;
+  tags?: {
+    isNew?: boolean;
+    isBestseller?: boolean;
+    isLimited?: boolean;
+    isBestSale?: boolean;
+  };
+  link?: string;
 }
 
 interface RelatedProduct {
@@ -40,6 +49,7 @@ const ProductDetailInteractive = ({
   relatedProducts,
 }: ProductDetailInteractiveProps) => {
   const [isHydrated, setIsHydrated] = useState(false);
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     setIsHydrated(true);
@@ -94,11 +104,12 @@ const ProductDetailInteractive = ({
                 description={product.description}
                 highlights={product.highlights}
                 specifications={product.specifications}
+                tags={product.tags}
               />
-              
+
               <ProductActions
-                onAddToCart={handleAddToCart}
-                onBuyNow={handleBuyNow}
+                productId={product.id}
+                productLink={product.link}
               />
             </div>
           </div>
@@ -107,6 +118,38 @@ const ProductDetailInteractive = ({
 
       {/* Related Products */}
       <RelatedProducts products={relatedProducts} />
+
+      {/* Mobile Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 md:hidden z-50 safe-bottom">
+        <div className="flex gap-3">
+          <button
+            onClick={() => toggleFavorite(product.id)}
+            className={`flex-1 h-12 px-4 ${isFavorite(product.id) ? 'bg-accent/10 text-accent' : 'bg-muted text-foreground'
+              } rounded-luxury font-body text-sm font-medium transition-luxury hover:bg-muted/80 active:scale-[0.97] flex items-center justify-center gap-2`}
+          >
+            <Icon
+              name="HeartIcon"
+              size={20}
+              variant={isFavorite(product.id) ? 'solid' : 'outline'}
+            />
+            <span>Wishlist</span>
+          </button>
+          <button
+            onClick={() => {
+              const link = product.link;
+              console.log('🔗 Mobile Buy Now clicked. Link:', link);
+              if (link) {
+                window.open(link, '_blank', 'noopener,noreferrer');
+              }
+            }}
+            disabled={!product.link}
+            className="flex-1 h-12 px-6 bg-accent text-accent-foreground rounded-luxury font-body text-sm font-medium transition-spring hover:shadow-luxury active:scale-[0.97] disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            <Icon name="BoltIcon" size={20} />
+            <span>Buy Now</span>
+          </button>
+        </div>
+      </div>
     </>
   );
 };

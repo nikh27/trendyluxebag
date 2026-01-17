@@ -5,6 +5,7 @@ import { useFavorites } from '@/contexts/FavoritesContext';
 import ProductCard from '@/app/product-listing/components/ProductCard';
 import Icon from '@/components/ui/AppIcon';
 import Link from 'next/link';
+import { getAllProducts } from '@/services/productService';
 
 interface Product {
   id: string;
@@ -25,162 +26,60 @@ interface Product {
 const FavoritesInteractive = () => {
   const { favorites } = useFavorites();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  const allProducts: Product[] = [
-    {
-      id: '1',
-      name: 'Classic Leather Tote Bag',
-      price: 299.99,
-      originalPrice: 399.99,
-      image: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214",
-      alt: 'Brown leather tote bag with gold hardware on white background',
-      category: 'tote',
-      isNew: true,
-      isBestseller: true,
-      isBestSale: true,
-      createdAt: '2026-01-10',
-      popularity: 95
-    },
-    {
-      id: '2',
-      name: 'Evening Satin Clutch',
-      price: 149.99,
-      image: "https://images.unsplash.com/photo-1614522118808-bf3a6cd2e005",
-      alt: 'Black satin clutch with silver chain strap on marble surface',
-      category: 'clutch',
-      isBestseller: true,
-      createdAt: '2026-01-08',
-      popularity: 88
-    },
-    {
-      id: '3',
-      name: 'Crossbody Messenger Bag',
-      price: 189.99,
-      originalPrice: 249.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1ea9e9cac-1768007414365.png",
-      alt: 'Tan crossbody messenger bag with adjustable strap on wooden table',
-      category: 'crossbody',
-      isNew: true,
-      isBestSale: true,
-      createdAt: '2026-01-12',
-      popularity: 82
-    },
-    {
-      id: '4',
-      name: 'Luxury Shoulder Handbag',
-      price: 449.99,
-      image: "https://images.unsplash.com/photo-1641812746933-b1b8d2ac8ba9",
-      alt: 'Burgundy leather shoulder bag with gold chain detail',
-      category: 'shoulder',
-      isBestseller: true,
-      isLimited: true,
-      createdAt: '2026-01-05',
-      popularity: 91
-    },
-    {
-      id: '5',
-      name: 'Travel Backpack Premium',
-      price: 279.99,
-      originalPrice: 349.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_184181d74-1768150129371.png",
-      alt: 'Black leather backpack with multiple compartments on gray background',
-      category: 'backpack',
-      isNew: true,
-      createdAt: '2026-01-14',
-      popularity: 79
-    },
-    {
-      id: '6',
-      name: 'Mini Crossbody Purse',
-      price: 129.99,
-      image: "https://images.unsplash.com/photo-1617958008526-678b6353a092",
-      alt: 'Pink mini crossbody purse with gold chain on white surface',
-      category: 'crossbody',
-      createdAt: '2026-01-06',
-      popularity: 75
-    },
-    {
-      id: '7',
-      name: 'Designer Tote Collection',
-      price: 599.99,
-      image: "https://images.unsplash.com/photo-1680789526738-7fcfd4a093c9",
-      alt: 'Beige designer tote bag with leather handles and gold logo',
-      category: 'tote',
-      isBestseller: true,
-      isLimited: true,
-      createdAt: '2026-01-03',
-      popularity: 93
-    },
-    {
-      id: '8',
-      name: 'Crystal Evening Clutch',
-      price: 199.99,
-      originalPrice: 279.99,
-      image: "https://images.unsplash.com/photo-1608368553807-622b422ee2c0",
-      alt: 'Silver crystal-embellished evening clutch on black velvet',
-      category: 'clutch',
-      isNew: true,
-      isBestSale: true,
-      createdAt: '2026-01-15',
-      popularity: 86
-    },
-    {
-      id: '9',
-      name: 'Everyday Shoulder Bag',
-      price: 219.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_17143f34b-1767994862727.png",
-      alt: 'Navy blue shoulder bag with adjustable strap on wooden background',
-      category: 'shoulder',
-      createdAt: '2026-01-07',
-      popularity: 77
-    },
-    {
-      id: '10',
-      name: 'Urban Backpack Style',
-      price: 249.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_12367e09c-1766973296429.png",
-      alt: 'Gray urban backpack with laptop compartment on concrete floor',
-      category: 'backpack',
-      isNew: true,
-      createdAt: '2026-01-11',
-      popularity: 81
-    },
-    {
-      id: '11',
-      name: 'Vintage Leather Tote',
-      price: 379.99,
-      originalPrice: 479.99,
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_1ea9e9cac-1768007414365.png",
-      alt: 'Brown vintage leather tote with brass buckles on rustic table',
-      category: 'tote',
-      isBestseller: true,
-      isBestSale: true,
-      createdAt: '2026-01-04',
-      popularity: 89
-    },
-    {
-      id: '12',
-      name: 'Metallic Party Clutch',
-      price: 169.99,
-      image: "https://images.unsplash.com/photo-1630534592550-bc740a0c5704",
-      alt: 'Gold metallic party clutch with chain strap on pink background',
-      category: 'clutch',
-      isLimited: true,
-      createdAt: '2026-01-09',
-      popularity: 73
-    }
-  ];
+  // Fetch products from Firestore
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllProducts();
 
-  const favoriteProducts = allProducts.filter((product) =>
+        // Transform products
+        const transformedProducts = data.map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.discount ? Math.round(p.price * (1 - p.discount / 100)) : p.price,
+          originalPrice: p.discount ? p.price : undefined,
+          image: p.images[0]?.url || '',
+          alt: p.images[0]?.alt || p.name,
+          category: p.category,
+          isNew: p.isNew,
+          isBestseller: p.isBestseller,
+          isLimited: p.isLimited,
+          isBestSale: p.isBestSale,
+          createdAt: p.createdAt,
+          popularity: 85
+        }));
+
+        setProducts(transformedProducts);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
+
+  const favoriteProducts = products.filter((product) =>
     favorites.includes(product.id)
   );
 
-  if (!isHydrated) {
-    return null;
+  if (!isHydrated || loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="h-96 bg-muted rounded-luxury animate-pulse" />
+        <div className="h-96 bg-muted rounded-luxury animate-pulse" />
+        <div className="h-96 bg-muted rounded-luxury animate-pulse" />
+      </div>
+    );
   }
 
   return (

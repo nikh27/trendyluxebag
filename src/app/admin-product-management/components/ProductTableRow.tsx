@@ -140,14 +140,13 @@ const ProductTableRow = ({
                 )}
             </td>
             <td className="p-4">
-                <button
-                    onClick={() => onToggleStatus(product.id)}
-                    className={`px-3 py-1.5 rounded-full caption text-xs font-medium transition-luxury ${getStatusColor(
+                <span
+                    className={`px-3 py-1.5 rounded-full caption text-xs font-medium ${getStatusColor(
                         product.status
                     )}`}
                 >
                     {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
-                </button>
+                </span>
             </td>
             <td className="p-4">
                 <div className="relative">

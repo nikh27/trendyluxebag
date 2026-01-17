@@ -52,14 +52,14 @@ const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
       {/* Main Image */}
       <div className="relative aspect-square bg-muted rounded-luxury overflow-hidden mb-4 group">
         <AppImage
+          key={selectedIndex} // Force re-render when index changes
           src={images[selectedIndex].url}
           alt={images[selectedIndex].alt}
-          className={`w-full h-full object-cover transition-luxury ${
-            isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'
-          }`}
+          className={`w-full h-full object-cover transition-luxury ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'
+            }`}
           onClick={handleZoomToggle}
         />
-        
+
         {/* Navigation Arrows */}
         {images.length > 1 && (
           <>
@@ -97,11 +97,10 @@ const ImageGallery = ({ images, productName }: ImageGalleryProps) => {
           <button
             key={index}
             onClick={() => handleThumbnailClick(index)}
-            className={`aspect-square rounded-luxury overflow-hidden transition-luxury ${
-              selectedIndex === index
-                ? 'ring-2 ring-primary shadow-luxury'
-                : 'ring-1 ring-border hover:ring-primary/50'
-            }`}
+            className={`aspect-square rounded-luxury overflow-hidden transition-luxury ${selectedIndex === index
+              ? 'ring-2 ring-primary shadow-luxury'
+              : 'ring-1 ring-border hover:ring-primary/50'
+              }`}
             aria-label={`View image ${index + 1}`}
           >
             <AppImage

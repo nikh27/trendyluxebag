@@ -21,6 +21,7 @@ interface Product {
   description: string;
   images: Array<{ url: string; alt: string; isPrimary?: boolean; displayOrder?: number; }>;
   productLink?: string;
+  highlights?: string[]; // Add this field
   keyHighlights?: string[];
   specifications?: Record<string, string>;
   tags?: {

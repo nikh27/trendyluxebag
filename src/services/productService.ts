@@ -23,13 +23,21 @@ export interface Product {
     category: string;
     images: Array<{ url: string; alt: string }>;
     highlights?: string[];
+    keyHighlights?: string[]; // Alternative field name
     specifications?: Record<string, string>;
     link?: string;
+    productLink?: string; // Alternative field name
     status: 'active' | 'draft' | 'archived';
     isNew?: boolean;
     isBestseller?: boolean;
     isLimited?: boolean;
     isBestSale?: boolean;
+    tags?: {
+        isNew?: boolean;
+        isBestseller?: boolean;
+        isLimited?: boolean;
+        isBestSale?: boolean;
+    };
     createdAt: string;
 }
 

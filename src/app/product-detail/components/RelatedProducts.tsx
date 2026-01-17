@@ -43,7 +43,7 @@ const RelatedProducts = ({ products }: RelatedProductsProps) => {
             return (
               <Link
                 key={product.id}
-                href="/product-detail"
+                href={`/product-detail?id=${product.id}`}
                 className="group bg-card rounded-luxury overflow-hidden shadow-luxury-sm transition-luxury hover:shadow-luxury"
               >
                 {/* Product Image */}
@@ -53,11 +53,26 @@ const RelatedProducts = ({ products }: RelatedProductsProps) => {
                     alt={product.alt}
                     className="w-full h-full object-cover transition-luxury group-hover:scale-105"
                   />
-                  {discount > 0 && (
-                    <div className="absolute top-4 left-4 px-3 py-1 bg-accent text-accent-foreground rounded-full caption font-medium">
-                      {discount}% OFF
-                    </div>
-                  )}
+
+                  {/* Tags */}
+                  <div className="absolute top-4 left-4 flex flex-col gap-2">
+                    {discount > 0 && (
+                      <div className="px-3 py-1 bg-accent text-accent-foreground rounded-full caption font-medium">
+                        {discount}% OFF
+                      </div>
+                    )}
+                    {(product as any).isNew && (
+                      <div className="px-3 py-1 bg-primary text-primary-foreground rounded-full caption font-medium">
+                        New
+                      </div>
+                    )}
+                    {(product as any).isLimited && (
+                      <div className="px-3 py-1 bg-error text-error-foreground rounded-full caption font-medium">
+                        Limited
+                      </div>
+                    )}
+                  </div>
+
                   <button
                     className="absolute top-4 right-4 w-10 h-10 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-luxury opacity-0 group-hover:opacity-100 hover:bg-background"
                     aria-label="Add to wishlist"
@@ -75,7 +90,7 @@ const RelatedProducts = ({ products }: RelatedProductsProps) => {
                   <h3 className="font-body text-base font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-luxury">
                     {product.name}
                   </h3>
-                  
+
                   {/* Rating */}
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
@@ -95,11 +110,11 @@ const RelatedProducts = ({ products }: RelatedProductsProps) => {
                   {/* Price */}
                   <div className="flex items-baseline gap-2">
                     <span className="font-body text-lg font-semibold text-foreground">
-                      ${product.price.toLocaleString()}
+                      ₹{product.price.toLocaleString()}
                     </span>
                     {product.originalPrice && (
                       <span className="caption text-muted-foreground line-through">
-                        ${product.originalPrice.toLocaleString()}
+                        ₹{product.originalPrice.toLocaleString()}
                       </span>
                     )}
                   </div>

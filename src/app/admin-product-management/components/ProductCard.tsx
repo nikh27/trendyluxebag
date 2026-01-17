@@ -61,16 +61,18 @@ const ProductCard = ({
     };
 
     return (
-        <div
-            className="bg-card rounded-luxury shadow-luxury-sm overflow-hidden cursor-pointer hover:shadow-luxury-md transition-luxury"
-            onClick={handleCardClick}
-        >
+        <div className="bg-card rounded-luxury shadow-luxury-sm overflow-hidden">
             <div className="relative h-48 bg-muted overflow-hidden">
-                <AppImage
-                    src={product.image}
-                    alt={product.alt}
-                    className="w-full h-full object-cover"
-                />
+                <div
+                    onClick={handleCardClick}
+                    className="cursor-pointer w-full h-full"
+                >
+                    <AppImage
+                        src={product.image}
+                        alt={product.alt}
+                        className="w-full h-full object-cover"
+                    />
+                </div>
                 {/* Product Tags */}
                 {(product.isNew || product.isBestseller || product.isLimited || product.isBestSale) && (
                     <div className="absolute top-3 left-3 flex flex-wrap gap-1">
@@ -147,17 +149,20 @@ const ProductCard = ({
             <div className="p-4">
                 {/* Product Name and Price Row */}
                 <div className="flex items-start justify-between gap-3 mb-3">
-                    <h3 className="font-body text-base font-bold text-foreground flex-1">
+                    <h3
+                        onClick={handleCardClick}
+                        className="font-body text-base font-bold text-foreground flex-1 cursor-pointer hover:text-primary transition-luxury"
+                    >
                         {product.name}
                     </h3>
-                    <div className="flex flex-col items-end">
+                    <div className="flex items-center gap-2">
                         {product.discount ? (
                             <>
-                                <span className="text-sm text-muted-foreground line-through">
-                                    ₹{product.price.toLocaleString()}
-                                </span>
                                 <span className="data-text text-base font-medium text-foreground">
                                     ₹{Math.round(product.price * (1 - product.discount / 100)).toLocaleString()}
+                                </span>
+                                <span className="text-sm text-muted-foreground line-through">
+                                    ₹{product.price.toLocaleString()}
                                 </span>
                             </>
                         ) : (

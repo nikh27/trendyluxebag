@@ -12,6 +12,7 @@ interface FilterOption {
 interface SearchFilterProps {
     onFilterChange?: (filters: FilterState) => void;
     onSearchChange?: (query: string) => void;
+    categories?: FilterOption[]; // Add dynamic categories
     className?: string;
 }
 
@@ -26,6 +27,7 @@ interface FilterState {
 const SearchFilter = ({
     onFilterChange,
     onSearchChange,
+    categories: propCategories,
     className = '',
 }: SearchFilterProps) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -35,12 +37,13 @@ const SearchFilter = ({
     const [sortBy, setSortBy] = useState('featured');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-    const categories: FilterOption[] = [
-        { id: 'tote', label: 'Tote Bags', count: 45 },
-        { id: 'clutch', label: 'Clutches', count: 32 },
-        { id: 'shoulder', label: 'Shoulder Bags', count: 58 },
-        { id: 'crossbody', label: 'Crossbody', count: 41 },
-        { id: 'backpack', label: 'Backpacks', count: 28 },
+    // Use prop categories or fallback to defaults
+    const categories: FilterOption[] = propCategories || [
+        { id: 'tote', label: 'Tote Bags', count: 0 },
+        { id: 'clutch', label: 'Clutches', count: 0 },
+        { id: 'shoulder', label: 'Shoulder Bags', count: 0 },
+        { id: 'crossbody', label: 'Crossbody', count: 0 },
+        { id: 'backpack', label: 'Backpacks', count: 0 },
     ];
 
     const tags: FilterOption[] = [
