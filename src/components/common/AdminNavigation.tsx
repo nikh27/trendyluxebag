@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
@@ -14,8 +14,20 @@ const AdminNavigation = ({
     isCollapsed = false,
     className = '',
 }: AdminNavigationProps) => {
-    const [collapsed, setCollapsed] = useState(isCollapsed);
+    // Initialize from localStorage
+    const [collapsed, setCollapsed] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('adminSidebarCollapsed');
+            return saved ? JSON.parse(saved) : isCollapsed;
+        }
+        return isCollapsed;
+    });
     const pathname = usePathname();
+
+    // Save to localStorage whenever state changes
+    useEffect(() => {
+        localStorage.setItem('adminSidebarCollapsed', JSON.stringify(collapsed));
+    }, [collapsed]);
 
     const navigationItems = [
         {
@@ -36,6 +48,18 @@ const AdminNavigation = ({
             icon: 'UsersIcon',
             description: 'User Management',
         },
+        {
+            label: 'Shop',
+            path: '/product-listing',
+            icon: 'ShoppingCartIcon',
+            description: 'View Shop',
+        },
+        {
+            label: 'Favorites',
+            path: '/favorites',
+            icon: 'HeartIcon',
+            description: 'View Favorites',
+        },
     ];
 
     const isActivePath = (path: string) => {
@@ -48,7 +72,7 @@ const AdminNavigation = ({
 
     return (
         <aside
-            className={`fixed left-0 top-0 h-screen bg-card border-r border-border z-navigation transition-all duration-300 ${collapsed ? 'w-20' : 'w-72'
+            className={`fixed left-0 top-0 h-screen bg-card border-r border-border z-40 transition-all duration-300 ${collapsed ? 'w-20' : 'w-72'
                 } ${className}`}
         >
             <div className="flex flex-col h-full">
@@ -60,21 +84,11 @@ const AdminNavigation = ({
                             className="flex items-center gap-3 transition-luxury hover:opacity-80"
                         >
                             <div className="relative w-8 h-8 flex items-center justify-center">
-                                <svg
-                                    viewBox="0 0 40 40"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="w-full h-full"
-                                >
-                                    <path
-                                        d="M20 4L8 12V28L20 36L32 28V12L20 4Z"
-                                        fill="var(--color-primary)"
-                                    />
-                                    <path
-                                        d="M20 12L14 16V24L20 28L26 24V16L20 12Z"
-                                        fill="var(--color-accent)"
-                                    />
-                                </svg>
+                                <img
+                                    src="/images/logo.png"
+                                    alt="TrendyLuxeBag Logo"
+                                    className="w-full h-full object-contain"
+                                />
                             </div>
                             <span className="font-heading text-xl font-semibold text-foreground">
                                 Admin
@@ -95,6 +109,25 @@ const AdminNavigation = ({
 
                 {/* Navigation Items */}
                 <nav className="flex-1 overflow-y-auto scrollbar-luxury p-4">
+                    {/* Back to Home */}
+                    <Link
+                        href="/home"
+                        className="flex items-center gap-4 p-4 mb-4 rounded-luxury transition-luxury hover:bg-muted border border-border"
+                        title={collapsed ? 'Back to Home' : undefined}
+                    >
+                        <Icon name="HomeIcon" size={24} />
+                        {!collapsed && (
+                            <div className="flex-1 min-w-0">
+                                <div className="font-body text-base font-medium">
+                                    Back to Home
+                                </div>
+                                <div className="caption text-sm text-muted-foreground">
+                                    Customer View
+                                </div>
+                            </div>
+                        )}
+                    </Link>
+
                     <div className="space-y-2">
                         {navigationItems.map((item) => {
                             const isActive = isActivePath(item.path);

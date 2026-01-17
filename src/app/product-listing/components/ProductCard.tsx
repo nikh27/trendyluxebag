@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { formatPKR } from '@/utils/currency';
 
 interface ProductCardProps {
     id: string;
@@ -120,11 +121,11 @@ const ProductCard = ({
                 </h3>
                 <div className="flex items-center gap-2">
                     <span className="data-text text-lg font-semibold text-foreground">
-                        ${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {formatPKR(price)}
                     </span>
                     {originalPrice && (
                         <span className="data-text text-sm text-muted-foreground line-through">
-                            ${originalPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                            {formatPKR(originalPrice)}
                         </span>
                     )}
                 </div>

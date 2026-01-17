@@ -34,7 +34,7 @@ interface FilterState {
 const ProductListingInteractive = () => {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [gridSize, setGridSize] = useState<'2x2' | '3x3' | '4x4'>('3x3');
+  const [gridSize, setGridSize] = useState<'2-col' | '4-col'>('2-col');
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     priceRange: [0, 5000],
@@ -297,14 +297,12 @@ const ProductListingInteractive = () => {
 
   const getGridColumns = () => {
     switch (gridSize) {
-      case '2x2':
+      case '2-col':
         return 'grid-cols-1 sm:grid-cols-2';
-      case '3x3':
-        return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
-      case '4x4':
-        return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
+      case '4-col':
+        return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4';
       default:
-        return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+        return 'grid-cols-1 sm:grid-cols-2';
     }
   };
 
@@ -352,26 +350,18 @@ const ProductListingInteractive = () => {
           {/* Grid Size Selector */}
           <div className="flex items-center gap-2 bg-card rounded-luxury p-1 shadow-luxury-sm">
             <button
-              onClick={() => setGridSize('2x2')}
-              className={`p-2 rounded-lg transition-luxury ${gridSize === '2x2' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              onClick={() => setGridSize('2-col')}
+              className={`p-2 rounded-lg transition-luxury ${gridSize === '2-col' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
-              aria-label="2x2 grid"
+              aria-label="2 columns"
             >
               <Icon name="Squares2X2Icon" size={20} />
             </button>
             <button
-              onClick={() => setGridSize('3x3')}
-              className={`p-2 rounded-lg transition-luxury ${gridSize === '3x3' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+              onClick={() => setGridSize('4-col')}
+              className={`p-2 rounded-lg transition-luxury ${gridSize === '4-col' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
-              aria-label="3x3 grid"
-            >
-              <Icon name="ViewColumnsIcon" size={20} />
-            </button>
-            <button
-              onClick={() => setGridSize('4x4')}
-              className={`p-2 rounded-lg transition-luxury ${gridSize === '4x4' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`}
-              aria-label="4x4 grid"
+              aria-label="4 columns"
             >
               <Icon name="Squares2X2Icon" size={24} />
             </button>

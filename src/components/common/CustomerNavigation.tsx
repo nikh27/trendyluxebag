@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
+import { getCurrentUser, mockLogout, type User } from '@/utils/mockAuth';
 
 
 interface CustomerNavigationProps {
@@ -13,7 +14,21 @@ interface CustomerNavigationProps {
 const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    setUser(getCurrentUser());
+  }, []);
+
+  const handleLogout = () => {
+    mockLogout();
+    setUser(null);
+    setIsProfileOpen(false);
+    router.push('/home');
+  };
 
   const navigationItems = [
     { label: 'Home', path: '/home', icon: 'HomeIcon' },
@@ -56,9 +71,8 @@ const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-navigation transition-luxury ${
-          isScrolled ? 'bg-card shadow-luxury' : 'bg-background'
-        } ${className}`}
+        className={`fixed top-0 left-0 right-0 z-navigation transition-luxury ${isScrolled ? 'bg-card shadow-luxury' : 'bg-background'
+          } ${className}`}
       >
         <nav className="flex items-center justify-between h-20 px-6 lg:px-12 max-w-[1920px] mx-auto">
           {/* Logo */}
@@ -68,23 +82,11 @@ const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
             onClick={handleLinkClick}
           >
             <div className="relative w-10 h-10 flex items-center justify-center">
-              <svg
-                viewBox="0 0 40 40"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-full"
-              >
-                <path
-                  d="M20 4L8 12V28L20 36L32 28V12L20 4Z"
-                  fill="var(--color-primary)"
-                  className="transition-luxury"
-                />
-                <path
-                  d="M20 12L14 16V24L20 28L26 24V16L20 12Z"
-                  fill="var(--color-accent)"
-                  className="transition-luxury"
-                />
-              </svg>
+              <img
+                src="/images/logo.png"
+                alt="TrendyLuxeBag Logo"
+                className="w-full h-full object-contain"
+              />
             </div>
             <span className="font-heading text-2xl font-semibold text-foreground tracking-tight">
               TrendyLuxeBag
@@ -159,11 +161,10 @@ const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
                   key={item.path}
                   href={item.path}
                   onClick={handleLinkClick}
-                  className={`flex items-center gap-4 p-4 rounded-luxury transition-luxury ${
-                    isActivePath(item.path)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-muted'
-                  }`}
+                  className={`flex items-center gap-4 p-4 rounded-luxury transition-luxury ${isActivePath(item.path)
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                    }`}
                 >
                   <Icon name={item.icon as any} size={24} />
                   <span className="font-body text-lg font-medium">

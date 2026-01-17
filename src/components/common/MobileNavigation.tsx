@@ -29,13 +29,15 @@ const MobileNavigation = ({
     { label: 'Shop', path: '/product-listing', icon: 'ShoppingBagIcon' },
     { label: 'Search', path: '/search', icon: 'MagnifyingGlassIcon' },
     { label: 'Account', path: '/account', icon: 'UserIcon' },
+    { label: 'Favorites', path: '/favorites', icon: 'HeartIcon' },
   ];
 
   const adminNavItems = [
     { label: 'Dashboard', path: '/admin-dashboard', icon: 'ChartBarIcon' },
     { label: 'Products', path: '/admin-product-management', icon: 'ShoppingBagIcon' },
     { label: 'Users', path: '/admin-user-management', icon: 'UsersIcon' },
-    { label: 'Settings', path: '/admin-settings', icon: 'Cog6ToothIcon' },
+    { label: 'Shop', path: '/product-listing', icon: 'ShoppingCartIcon' },
+    { label: 'Favorites', path: '/favorites', icon: 'HeartIcon' },
   ];
 
   const navItems = isAdminPage ? adminNavItems : customerNavItems;
@@ -80,9 +82,8 @@ const MobileNavigation = ({
             <Link
               key={item.path}
               href={item.path}
-              className={`flex flex-col items-center justify-center flex-1 h-full transition-luxury ${
-                isActive ? 'text-primary' : 'text-muted-foreground'
-              }`}
+              className={`flex flex-col items-center justify-center flex-1 h-full transition-luxury ${isActive ? 'text-primary' : 'text-muted-foreground'
+                }`}
             >
               <div className="relative">
                 <Icon name={item.icon as any} size={24} />
@@ -98,20 +99,6 @@ const MobileNavigation = ({
             </Link>
           );
         })}
-        <Link
-          href="/product-listing"
-          className="flex flex-col items-center gap-1 transition-luxury hover:text-primary"
-        >
-          <Icon name="ShoppingBagIcon" size={24} />
-          <span className="caption text-xs">Products</span>
-        </Link>
-        <Link
-          href="/favorites"
-          className="flex flex-col items-center gap-1 transition-luxury hover:text-primary"
-        >
-          <Icon name="HeartIcon" size={24} />
-          <span className="caption text-xs">Favorites</span>
-        </Link>
       </div>
     </nav>
   );

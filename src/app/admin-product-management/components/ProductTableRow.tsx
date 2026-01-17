@@ -9,13 +9,15 @@ interface Product {
     name: string;
     category: string;
     price: number;
+    discount?: number;
     status: 'active' | 'draft' | 'archived';
     image: string;
     alt: string;
-    stock: number;
     description: string;
     images: Array<{ url: string; alt: string; }>;
     link?: string;
+    highlights?: string[];
+    specifications?: Record<string, string>;
     isNew?: boolean;
     isBestseller?: boolean;
     isLimited?: boolean;
@@ -27,6 +29,8 @@ interface ProductTableRowProps {
     onEdit: (product: Product) => void;
     onDelete: (productId: string) => void;
     onToggleStatus: (productId: string) => void;
+    isSelected?: boolean;
+    onToggleSelect?: () => void;
 }
 
 const ProductTableRow = ({
@@ -34,6 +38,8 @@ const ProductTableRow = ({
     onEdit,
     onDelete,
     onToggleStatus,
+    isSelected = false,
+    onToggleSelect,
 }: ProductTableRowProps) => {
     const [showActions, setShowActions] = useState(false);
 
@@ -52,6 +58,16 @@ const ProductTableRow = ({
 
     return (
         <tr className="border-b border-border hover:bg-muted/50 transition-luxury">
+            {onToggleSelect && (
+                <td className="p-4">
+                    <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={onToggleSelect}
+                        className="w-5 h-5 rounded border-border text-primary focus:ring-2 focus:ring-ring transition-luxury"
+                    />
+                </td>
+            )}
             <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-luxury overflow-hidden bg-muted flex-shrink-0">
@@ -96,14 +112,9 @@ const ProductTableRow = ({
             <td className="p-4">
                 <span className="font-body text-sm text-foreground">{product.category}</span>
             </td>
-            <td className="p-4">
+            <td className="px-6 py-4">
                 <span className="data-text text-base font-medium text-foreground">
-                    ${product.price.toLocaleString()}
-                </span>
-            </td>
-            <td className="p-4">
-                <span className="data-text text-sm text-muted-foreground">
-                    {product.stock} units
+                    Rs {product.price.toLocaleString()}
                 </span>
             </td>
             <td className="p-4">

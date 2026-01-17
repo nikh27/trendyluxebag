@@ -17,7 +17,7 @@ interface Product {
   alt: string;
   stock: number;
   description: string;
-  images: Array<{url: string;alt: string;}>;
+  images: Array<{ url: string; alt: string; }>;
   link?: string;
   isNew?: boolean;
   isBestseller?: boolean;
@@ -42,162 +42,162 @@ const ProductManagementInteractive = () => {
     setIsHydrated(true);
 
     const mockProducts: Product[] = [
-    {
-      id: 'PRD001',
-      name: 'Classic Leather Tote',
-      category: 'Tote Bags',
-      price: 299,
-      status: 'active',
-      image: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214",
-      alt: 'Elegant brown leather tote bag with gold hardware on white background',
-      stock: 45,
-      description: 'Timeless leather tote perfect for everyday use with spacious interior and premium craftsmanship',
-      images: [
       {
-        url: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214",
-        alt: 'Elegant brown leather tote bag with gold hardware on white background'
+        id: 'PRD001',
+        name: 'Classic Leather Tote',
+        category: 'Tote Bags',
+        price: 299,
+        status: 'active',
+        image: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214",
+        alt: 'Elegant brown leather tote bag with gold hardware on white background',
+        stock: 45,
+        description: 'Timeless leather tote perfect for everyday use with spacious interior and premium craftsmanship',
+        images: [
+          {
+            url: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214",
+            alt: 'Elegant brown leather tote bag with gold hardware on white background'
+          },
+          {
+            url: "https://images.unsplash.com/photo-1637759292654-a12cb2be085e",
+            alt: 'Close-up of brown leather tote bag showing texture and stitching details'
+          }],
+
+        link: '/product-detail',
+        isNew: true,
+        isBestseller: true
       },
       {
-        url: "https://images.unsplash.com/photo-1637759292654-a12cb2be085e",
-        alt: 'Close-up of brown leather tote bag showing texture and stitching details'
-      }],
+        id: 'PRD002',
+        name: 'Evening Clutch Gold',
+        category: 'Clutches',
+        price: 189,
+        status: 'active',
+        image: "https://images.unsplash.com/photo-1601281866896-1576541e77a1",
+        alt: 'Luxurious gold metallic clutch with chain strap on marble surface',
+        stock: 28,
+        description: 'Sophisticated gold clutch with detachable chain strap for elegant evening occasions',
+        images: [
+          {
+            url: "https://images.unsplash.com/photo-1601281866896-1576541e77a1",
+            alt: 'Luxurious gold metallic clutch with chain strap on marble surface'
+          }],
 
-      link: '/product-detail',
-      isNew: true,
-      isBestseller: true
-    },
-    {
-      id: 'PRD002',
-      name: 'Evening Clutch Gold',
-      category: 'Clutches',
-      price: 189,
-      status: 'active',
-      image: "https://images.unsplash.com/photo-1601281866896-1576541e77a1",
-      alt: 'Luxurious gold metallic clutch with chain strap on marble surface',
-      stock: 28,
-      description: 'Sophisticated gold clutch with detachable chain strap for elegant evening occasions',
-      images: [
+        link: '/product-detail',
+        isBestSale: true
+      },
       {
-        url: "https://images.unsplash.com/photo-1601281866896-1576541e77a1",
-        alt: 'Luxurious gold metallic clutch with chain strap on marble surface'
-      }],
+        id: 'PRD003',
+        name: 'Crossbody Messenger',
+        category: 'Crossbody',
+        price: 249,
+        status: 'active',
+        image: "https://images.unsplash.com/photo-1620786514663-8c3f57ffe17c",
+        alt: 'Modern black crossbody messenger bag with adjustable strap on urban background',
+        stock: 62,
+        description: 'Versatile crossbody messenger with multiple compartments for modern lifestyle',
+        images: [
+          {
+            url: "https://images.unsplash.com/photo-1620786514663-8c3f57ffe17c",
+            alt: 'Modern black crossbody messenger bag with adjustable strap on urban background'
+          }],
 
-      link: '/product-detail',
-      isBestSale: true
-    },
-    {
-      id: 'PRD003',
-      name: 'Crossbody Messenger',
-      category: 'Crossbody',
-      price: 249,
-      status: 'active',
-      image: "https://images.unsplash.com/photo-1620786514663-8c3f57ffe17c",
-      alt: 'Modern black crossbody messenger bag with adjustable strap on urban background',
-      stock: 62,
-      description: 'Versatile crossbody messenger with multiple compartments for modern lifestyle',
-      images: [
+        link: '/product-detail',
+        isBestseller: true
+      },
       {
-        url: "https://images.unsplash.com/photo-1620786514663-8c3f57ffe17c",
-        alt: 'Modern black crossbody messenger bag with adjustable strap on urban background'
-      }],
+        id: 'PRD004',
+        name: 'Travel Backpack Pro',
+        category: 'Backpacks',
+        price: 349,
+        status: 'draft',
+        image: "https://images.unsplash.com/photo-1583747354150-c8d5f09e4d8a",
+        alt: 'Spacious navy blue travel backpack with laptop compartment on wooden floor',
+        stock: 18,
+        description: 'Professional travel backpack with laptop compartment and ergonomic design',
+        images: [
+          {
+            url: "https://images.unsplash.com/photo-1583747354150-c8d5f09e4d8a",
+            alt: 'Spacious navy blue travel backpack with laptop compartment on wooden floor'
+          }],
 
-      link: '/product-detail',
-      isBestseller: true
-    },
-    {
-      id: 'PRD004',
-      name: 'Travel Backpack Pro',
-      category: 'Backpacks',
-      price: 349,
-      status: 'draft',
-      image: "https://images.unsplash.com/photo-1583747354150-c8d5f09e4d8a",
-      alt: 'Spacious navy blue travel backpack with laptop compartment on wooden floor',
-      stock: 18,
-      description: 'Professional travel backpack with laptop compartment and ergonomic design',
-      images: [
+        link: '/product-detail',
+        isNew: true
+      },
       {
-        url: "https://images.unsplash.com/photo-1583747354150-c8d5f09e4d8a",
-        alt: 'Spacious navy blue travel backpack with laptop compartment on wooden floor'
-      }],
+        id: 'PRD005',
+        name: 'Shoulder Bag Classic',
+        category: 'Shoulder Bags',
+        price: 279,
+        status: 'active',
+        image: "https://img.rocket.new/generatedImages/rocket_gen_img_198daedf1-1767774927880.png",
+        alt: 'Elegant beige shoulder bag with gold chain detail hanging on display',
+        stock: 34,
+        description: 'Classic shoulder bag with timeless design and premium materials',
+        images: [
+          {
+            url: "https://img.rocket.new/generatedImages/rocket_gen_img_198daedf1-1767774927880.png",
+            alt: 'Elegant beige shoulder bag with gold chain detail hanging on display'
+          }],
 
-      link: '/product-detail',
-      isNew: true
-    },
-    {
-      id: 'PRD005',
-      name: 'Shoulder Bag Classic',
-      category: 'Shoulder Bags',
-      price: 279,
-      status: 'active',
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_198daedf1-1767774927880.png",
-      alt: 'Elegant beige shoulder bag with gold chain detail hanging on display',
-      stock: 34,
-      description: 'Classic shoulder bag with timeless design and premium materials',
-      images: [
+        link: '/product-detail',
+        isLimited: true
+      },
       {
-        url: "https://img.rocket.new/generatedImages/rocket_gen_img_198daedf1-1767774927880.png",
-        alt: 'Elegant beige shoulder bag with gold chain detail hanging on display'
-      }],
+        id: 'PRD006',
+        name: 'Mini Crossbody',
+        category: 'Crossbody',
+        price: 159,
+        status: 'active',
+        image: "https://images.unsplash.com/photo-1713425885987-fa917f173fa9",
+        alt: 'Compact red mini crossbody bag with gold hardware on white surface',
+        stock: 52,
+        description: 'Compact crossbody perfect for essentials with adjustable strap',
+        images: [
+          {
+            url: "https://images.unsplash.com/photo-1713425885987-fa917f173fa9",
+            alt: 'Compact red mini crossbody bag with gold hardware on white surface'
+          }],
 
-      link: '/product-detail',
-      isLimited: true
-    },
-    {
-      id: 'PRD006',
-      name: 'Mini Crossbody',
-      category: 'Crossbody',
-      price: 159,
-      status: 'active',
-      image: "https://images.unsplash.com/photo-1713425885987-fa917f173fa9",
-      alt: 'Compact red mini crossbody bag with gold hardware on white surface',
-      stock: 52,
-      description: 'Compact crossbody perfect for essentials with adjustable strap',
-      images: [
+        link: '/product-detail'
+      },
       {
-        url: "https://images.unsplash.com/photo-1713425885987-fa917f173fa9",
-        alt: 'Compact red mini crossbody bag with gold hardware on white surface'
-      }],
+        id: 'PRD007',
+        name: 'Weekend Tote Large',
+        category: 'Tote Bags',
+        price: 329,
+        status: 'archived',
+        image: "https://img.rocket.new/generatedImages/rocket_gen_img_12e3fa5ba-1765572948306.png",
+        alt: 'Large canvas tote bag with leather handles perfect for weekend trips',
+        stock: 0,
+        description: 'Spacious weekend tote with durable canvas and leather accents',
+        images: [
+          {
+            url: "https://img.rocket.new/generatedImages/rocket_gen_img_12e3fa5ba-1765572948306.png",
+            alt: 'Large canvas tote bag with leather handles perfect for weekend trips'
+          }],
 
-      link: '/product-detail'
-    },
-    {
-      id: 'PRD007',
-      name: 'Weekend Tote Large',
-      category: 'Tote Bags',
-      price: 329,
-      status: 'archived',
-      image: "https://img.rocket.new/generatedImages/rocket_gen_img_12e3fa5ba-1765572948306.png",
-      alt: 'Large canvas tote bag with leather handles perfect for weekend trips',
-      stock: 0,
-      description: 'Spacious weekend tote with durable canvas and leather accents',
-      images: [
+        link: '/product-detail'
+      },
       {
-        url: "https://img.rocket.new/generatedImages/rocket_gen_img_12e3fa5ba-1765572948306.png",
-        alt: 'Large canvas tote bag with leather handles perfect for weekend trips'
-      }],
+        id: 'PRD008',
+        name: 'Designer Clutch Pearl',
+        category: 'Clutches',
+        price: 399,
+        status: 'active',
+        image: "https://images.unsplash.com/photo-1608368553807-622b422ee2c0",
+        alt: 'Luxury pearl-embellished clutch with crystal clasp on velvet background',
+        stock: 12,
+        description: 'Exclusive designer clutch with pearl embellishments and crystal details',
+        images: [
+          {
+            url: "https://images.unsplash.com/photo-1608368553807-622b422ee2c0",
+            alt: 'Luxury pearl-embellished clutch with crystal clasp on velvet background'
+          }],
 
-      link: '/product-detail'
-    },
-    {
-      id: 'PRD008',
-      name: 'Designer Clutch Pearl',
-      category: 'Clutches',
-      price: 399,
-      status: 'active',
-      image: "https://images.unsplash.com/photo-1608368553807-622b422ee2c0",
-      alt: 'Luxury pearl-embellished clutch with crystal clasp on velvet background',
-      stock: 12,
-      description: 'Exclusive designer clutch with pearl embellishments and crystal details',
-      images: [
-      {
-        url: "https://images.unsplash.com/photo-1608368553807-622b422ee2c0",
-        alt: 'Luxury pearl-embellished clutch with crystal clasp on velvet background'
-      }],
-
-      link: '/product-detail',
-      isLimited: true,
-      isBestSale: true
-    }];
+        link: '/product-detail',
+        isLimited: true,
+        isBestSale: true
+      }];
 
 
     setProducts(mockProducts);
@@ -212,8 +212,8 @@ const ProductManagementInteractive = () => {
     if (searchQuery) {
       filtered = filtered.filter(
         (p) =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.id.toLowerCase().includes(searchQuery.toLowerCase())
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.id.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -248,13 +248,13 @@ const ProductManagementInteractive = () => {
   }
 
   const categories = [
-  'all',
-  'Tote Bags',
-  'Clutches',
-  'Shoulder Bags',
-  'Crossbody',
-  'Backpacks',
-  'Travel Bags'];
+    'all',
+    'Tote Bags',
+    'Clutches',
+    'Shoulder Bags',
+    'Crossbody',
+    'Backpacks',
+    'Travel Bags'];
 
 
   const handleEdit = (product: Product) => {
@@ -271,34 +271,34 @@ const ProductManagementInteractive = () => {
 
   const handleToggleStatus = (productId: string) => {
     setProducts((prev) =>
-    prev.map((p) => {
-      if (p.id === productId) {
-        const statusOrder: Array<'active' | 'draft' | 'archived'> = [
-        'active',
-        'draft',
-        'archived'];
+      prev.map((p) => {
+        if (p.id === productId) {
+          const statusOrder: Array<'active' | 'draft' | 'archived'> = [
+            'active',
+            'draft',
+            'archived'];
 
-        const currentIndex = statusOrder.indexOf(p.status);
-        const nextStatus =
-        statusOrder[(currentIndex + 1) % statusOrder.length];
-        return { ...p, status: nextStatus };
-      }
-      return p;
-    })
+          const currentIndex = statusOrder.indexOf(p.status);
+          const nextStatus =
+            statusOrder[(currentIndex + 1) % statusOrder.length];
+          return { ...p, status: nextStatus };
+        }
+        return p;
+      })
     );
   };
 
   const handleSaveProduct = (updatedProduct: Product) => {
     setProducts((prev) =>
-    prev.map((p) => p.id === updatedProduct.id ? updatedProduct : p)
+      prev.map((p) => p.id === updatedProduct.id ? updatedProduct : p)
     );
   };
 
   const handleToggleSelect = (productId: string) => {
     setSelectedProducts((prev) =>
-    prev.includes(productId) ?
-    prev.filter((id) => id !== productId) :
-    [...prev, productId]
+      prev.includes(productId) ?
+        prev.filter((id) => id !== productId) :
+        [...prev, productId]
     );
   };
 
@@ -312,12 +312,11 @@ const ProductManagementInteractive = () => {
 
   const handleBulkDelete = () => {
     if (
-    confirm(
-      `Are you sure you want to delete ${selectedProducts.length} products?`
-    ))
-    {
+      confirm(
+        `Are you sure you want to delete ${selectedProducts.length} products?`
+      )) {
       setProducts((prev) =>
-      prev.filter((p) => !selectedProducts.includes(p.id))
+        prev.filter((p) => !selectedProducts.includes(p.id))
       );
       setSelectedProducts([]);
     }
@@ -325,9 +324,9 @@ const ProductManagementInteractive = () => {
 
   const handleBulkStatusChange = (status: 'active' | 'draft' | 'archived') => {
     setProducts((prev) =>
-    prev.map((p) =>
-    selectedProducts.includes(p.id) ? { ...p, status } : p
-    )
+      prev.map((p) =>
+        selectedProducts.includes(p.id) ? { ...p, status } : p
+      )
     );
     setSelectedProducts([]);
   };
@@ -409,14 +408,13 @@ const ProductManagementInteractive = () => {
       {/* Filters */}
       <div className="flex items-center gap-3 overflow-x-auto scrollbar-luxury pb-2">
         {categories.map((cat) =>
-        <button
-          key={cat}
-          onClick={() => setSelectedCategory(cat)}
-          className={`px-4 py-2 rounded-luxury font-body text-sm font-medium whitespace-nowrap transition-luxury ${
-          selectedCategory === cat ?
-          'bg-primary text-primary-foreground' :
-          'bg-muted text-foreground hover:bg-muted/80'}`
-          }>
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`px-4 py-2 rounded-luxury font-body text-sm font-medium whitespace-nowrap transition-luxury ${selectedCategory === cat ?
+                'bg-primary text-primary-foreground' :
+                'bg-muted text-foreground hover:bg-muted/80'}`
+            }>
 
             {cat === 'all' ? 'All Categories' : cat}
           </button>
@@ -425,36 +423,36 @@ const ProductManagementInteractive = () => {
 
       {/* Desktop Table View */}
       {viewMode === 'table' &&
-      <div className="hidden lg:block bg-card rounded-luxury shadow-luxury-sm overflow-hidden">
+        <div className="hidden lg:block bg-card rounded-luxury shadow-luxury-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
                   <th className="p-4 text-left">
                     <input
-                    type="checkbox"
-                    checked={
-                    selectedProducts.length === filteredProducts.length &&
-                    filteredProducts.length > 0
-                    }
-                    onChange={handleSelectAll}
-                    className="w-5 h-5 rounded border-border text-primary focus:ring-2 focus:ring-ring transition-luxury" />
+                      type="checkbox"
+                      checked={
+                        selectedProducts.length === filteredProducts.length &&
+                        filteredProducts.length > 0
+                      }
+                      onChange={handleSelectAll}
+                      className="w-5 h-5 rounded border-border text-primary focus:ring-2 focus:ring-ring transition-luxury" />
 
                   </th>
                   <th className="p-4 text-left">
                     <button
-                    onClick={() => handleSort('name')}
-                    className="flex items-center gap-2 font-body text-sm font-medium text-foreground transition-luxury hover:text-primary">
+                      onClick={() => handleSort('name')}
+                      className="flex items-center gap-2 font-body text-sm font-medium text-foreground transition-luxury hover:text-primary">
 
                       <span>Product</span>
                       {sortBy === 'name' &&
-                    <Icon
-                      name={
-                      sortOrder === 'asc' ? 'ChevronUpIcon' : 'ChevronDownIcon'
-                      }
-                      size={16} />
+                        <Icon
+                          name={
+                            sortOrder === 'asc' ? 'ChevronUpIcon' : 'ChevronDownIcon'
+                          }
+                          size={16} />
 
-                    }
+                      }
                     </button>
                   </th>
                   <th className="p-4 text-left">
@@ -464,34 +462,34 @@ const ProductManagementInteractive = () => {
                   </th>
                   <th className="p-4 text-left">
                     <button
-                    onClick={() => handleSort('price')}
-                    className="flex items-center gap-2 font-body text-sm font-medium text-foreground transition-luxury hover:text-primary">
+                      onClick={() => handleSort('price')}
+                      className="flex items-center gap-2 font-body text-sm font-medium text-foreground transition-luxury hover:text-primary">
 
                       <span>Price</span>
                       {sortBy === 'price' &&
-                    <Icon
-                      name={
-                      sortOrder === 'asc' ? 'ChevronUpIcon' : 'ChevronDownIcon'
-                      }
-                      size={16} />
+                        <Icon
+                          name={
+                            sortOrder === 'asc' ? 'ChevronUpIcon' : 'ChevronDownIcon'
+                          }
+                          size={16} />
 
-                    }
+                      }
                     </button>
                   </th>
                   <th className="p-4 text-left">
                     <button
-                    onClick={() => handleSort('stock')}
-                    className="flex items-center gap-2 font-body text-sm font-medium text-foreground transition-luxury hover:text-primary">
+                      onClick={() => handleSort('stock')}
+                      className="flex items-center gap-2 font-body text-sm font-medium text-foreground transition-luxury hover:text-primary">
 
                       <span>Stock</span>
                       {sortBy === 'stock' &&
-                    <Icon
-                      name={
-                      sortOrder === 'asc' ? 'ChevronUpIcon' : 'ChevronDownIcon'
-                      }
-                      size={16} />
+                        <Icon
+                          name={
+                            sortOrder === 'asc' ? 'ChevronUpIcon' : 'ChevronDownIcon'
+                          }
+                          size={16} />
 
-                    }
+                      }
                     </button>
                   </th>
                   <th className="p-4 text-left">
@@ -507,34 +505,27 @@ const ProductManagementInteractive = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((product) =>
-              <tr key={product.id}>
-                    <td className="p-4">
-                      <input
-                    type="checkbox"
-                    checked={selectedProducts.includes(product.id)}
-                    onChange={() => handleToggleSelect(product.id)}
-                    className="w-5 h-5 rounded border-border text-primary focus:ring-2 focus:ring-ring transition-luxury" />
-
-                    </td>
-                    <ProductTableRow
-                  product={product}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onToggleStatus={handleToggleStatus} />
-
-                  </tr>
-              )}
+                {filteredProducts.map((product) => (
+                  <ProductTableRow
+                    key={product.id}
+                    product={product}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onToggleStatus={handleToggleStatus}
+                    isSelected={selectedProducts.includes(product.id)}
+                    onToggleSelect={() => handleToggleSelect(product.id)}
+                  />
+                ))}
               </tbody>
             </table>
           </div>
 
           {filteredProducts.length === 0 &&
-        <div className="flex flex-col items-center justify-center py-16 px-6">
+            <div className="flex flex-col items-center justify-center py-16 px-6">
               <Icon
-            name="ShoppingBagIcon"
-            size={48}
-            className="text-muted-foreground mb-4" />
+                name="ShoppingBagIcon"
+                size={48}
+                className="text-muted-foreground mb-4" />
 
               <p className="font-body text-lg text-foreground mb-2">
                 No products found
@@ -543,31 +534,31 @@ const ProductManagementInteractive = () => {
                 Try adjusting your search or filters
               </p>
             </div>
-        }
+          }
         </div>
       }
 
       {/* Grid View (Desktop & Mobile) */}
       {(viewMode === 'grid' || window.innerWidth < 1024) &&
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map((product) =>
-        <ProductCard
-          key={product.id}
-          product={product}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onToggleStatus={handleToggleStatus} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onToggleStatus={handleToggleStatus} />
 
-        )}
+          )}
         </div>
       }
 
       {filteredProducts.length === 0 && viewMode === 'grid' &&
-      <div className="flex flex-col items-center justify-center py-16 px-6 bg-card rounded-luxury">
+        <div className="flex flex-col items-center justify-center py-16 px-6 bg-card rounded-luxury">
           <Icon
-          name="ShoppingBagIcon"
-          size={48}
-          className="text-muted-foreground mb-4" />
+            name="ShoppingBagIcon"
+            size={48}
+            className="text-muted-foreground mb-4" />
 
           <p className="font-body text-lg text-foreground mb-2">
             No products found

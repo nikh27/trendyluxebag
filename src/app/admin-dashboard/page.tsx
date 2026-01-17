@@ -11,7 +11,7 @@ export default function AdminDashboardPage() {
     return (
         <div className="min-h-screen bg-background">
             <AdminNavigation />
-            <main className="ml-72 min-h-screen p-6 lg:p-8">
+            <main className="ml-20 lg:ml-72 min-h-screen p-6 lg:p-8 transition-all duration-300">
                 <DashboardInteractive />
             </main>
         </div>

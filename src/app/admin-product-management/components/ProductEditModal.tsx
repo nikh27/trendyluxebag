@@ -9,13 +9,15 @@ interface Product {
     name: string;
     category: string;
     price: number;
+    discount?: number; // Discount percentage
     status: 'active' | 'draft' | 'archived';
     image: string;
     alt: string;
-    stock: number;
     description: string;
     images: Array<{ url: string; alt: string }>;
-    link?: string;
+    link?: string; // External Amazon/affiliate link
+    highlights?: string[]; // Key highlights as bullet points
+    specifications?: Record<string, string>; // Key-value pairs
     isNew?: boolean;
     isBestseller?: boolean;
     isLimited?: boolean;
@@ -40,13 +42,15 @@ const ProductEditModal = ({
         name: product?.name || '',
         category: product?.category || '',
         price: product?.price || 0,
-        stock: product?.stock || 0,
+        discount: product?.discount || 0,
         status: product?.status || 'draft',
         description: product?.description || '',
         image: product?.image || '',
         alt: product?.alt || '',
         images: product?.images || [],
         link: product?.link || '',
+        highlights: product?.highlights || [],
+        specifications: product?.specifications || {},
         isNew: product?.isNew || false,
         isBestseller: product?.isBestseller || false,
         isLimited: product?.isLimited || false,
@@ -55,6 +59,9 @@ const ProductEditModal = ({
     const [imageUrl, setImageUrl] = useState('');
     const [imageAlt, setImageAlt] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [newHighlight, setNewHighlight] = useState('');
+    const [newSpecKey, setNewSpecKey] = useState('');
+    const [newSpecValue, setNewSpecValue] = useState('');
 
     useEffect(() => {
         if (product) {
@@ -119,9 +126,6 @@ const ProductEditModal = ({
         if (formData.price <= 0) {
             newErrors.price = 'Price must be greater than 0';
         }
-        if (formData.stock < 0) {
-            newErrors.stock = 'Stock cannot be negative';
-        }
         if (formData.images.length === 0) {
             newErrors.images = 'At least one image is required';
         }
@@ -137,26 +141,30 @@ const ProductEditModal = ({
 
     return (
         <>
+            {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+                className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[60] transition-opacity"
                 onClick={onClose}
             />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-                <div className="bg-card rounded-luxury shadow-luxury-lg w-full max-w-4xl my-8">
-                    <div className="flex items-center justify-between p-6 border-b border-border">
-                        <h2 className="font-heading text-2xl font-semibold text-foreground">
-                            Edit Product
+            {/* Modal Container - Above sidebar */}
+            <div className="fixed inset-0 z-[70] flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+                <div className="bg-card rounded-lg sm:rounded-luxury shadow-luxury-lg w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] my-auto flex flex-col">
+                    {/* Header - Sticky */}
+                    <div className="sticky top-0 z-10 bg-card flex items-center justify-between p-4 sm:p-6 border-b border-border rounded-t-lg sm:rounded-t-luxury">
+                        <h2 className="font-heading text-xl sm:text-2xl font-semibold text-foreground">
+                            {product ? 'Edit Product' : 'Add Product'}
                         </h2>
                         <button
                             onClick={onClose}
-                            className="p-2 rounded-luxury transition-luxury hover:bg-muted"
+                            className="p-2 rounded-lg hover:bg-muted transition-luxury flex-shrink-0"
                             aria-label="Close modal"
                         >
-                            <Icon name="XMarkIcon" size={24} />
+                            <Icon name="XMarkIcon" size={20} />
                         </button>
                     </div>
 
-                    <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-luxury">
+                    {/* Scrollable Content */}
+                    <div className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1">
                         {/* Basic Information */}
                         <div className="space-y-4">
                             <h3 className="font-body text-lg font-medium text-foreground">
@@ -277,29 +285,6 @@ const ProductEditModal = ({
                                         <p className="caption text-error mt-1">{errors.price}</p>
                                     )}
                                 </div>
-
-                                <div>
-                                    <label
-                                        htmlFor="product-stock"
-                                        className="block caption text-muted-foreground mb-2"
-                                    >
-                                        Stock Quantity *
-                                    </label>
-                                    <input
-                                        id="product-stock"
-                                        type="number"
-                                        value={formData.stock}
-                                        onChange={(e) =>
-                                            handleInputChange('stock', parseInt(e.target.value))
-                                        }
-                                        className="w-full h-12 px-4 bg-input border border-border rounded-luxury font-body text-base transition-luxury focus:outline-none focus:ring-2 focus:ring-ring"
-                                        placeholder="0"
-                                        min="0"
-                                    />
-                                    {errors.stock && (
-                                        <p className="caption text-error mt-1">{errors.stock}</p>
-                                    )}
-                                </div>
                             </div>
 
                             <div>
@@ -317,6 +302,179 @@ const ProductEditModal = ({
                                     className="w-full h-12 px-4 bg-input border border-border rounded-luxury font-body text-base transition-luxury focus:outline-none focus:ring-2 focus:ring-ring"
                                     placeholder="https://example.com/product"
                                 />
+                            </div>
+                        </div>
+
+                        {/* Discount, Highlights & Specifications */}
+                        <div className="space-y-4">
+                            <h3 className="font-body text-lg font-medium text-foreground">
+                                Additional Details
+                            </h3>
+
+                            {/* Discount */}
+                            <div>
+                                <label htmlFor="product-discount" className="block caption text-muted-foreground mb-2">
+                                    Discount (%)
+                                </label>
+                                <input
+                                    id="product-discount"
+                                    type="number"
+                                    value={formData.discount || 0}
+                                    onChange={(e) => handleInputChange('discount', parseFloat(e.target.value) || 0)}
+                                    className="w-full h-12 px-4 bg-input border border-border rounded-luxury font-body text-base transition-luxury focus:outline-none focus:ring-2 focus:ring-ring"
+                                    placeholder="0"
+                                    min="0"
+                                    max="100"
+                                />
+                            </div>
+
+                            {/* Key Highlights */}
+                            <div>
+                                <label className="block caption text-muted-foreground mb-2">
+                                    Key Highlights
+                                </label>
+                                <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={newHighlight}
+                                            onChange={(e) => setNewHighlight(e.target.value)}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    if (newHighlight.trim()) {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            highlights: [...(prev.highlights || []), newHighlight.trim()]
+                                                        }));
+                                                        setNewHighlight('');
+                                                    }
+                                                }
+                                            }}
+                                            className="flex-1 h-10 px-4 bg-input border border-border rounded-lg font-body text-sm"
+                                            placeholder="Add a highlight..."
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (newHighlight.trim()) {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        highlights: [...(prev.highlights || []), newHighlight.trim()]
+                                                    }));
+                                                    setNewHighlight('');
+                                                }
+                                            }}
+                                            className="px-4 h-10 bg-primary text-primary-foreground rounded-lg text-sm font-medium"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                    {formData.highlights && formData.highlights.length > 0 && (
+                                        <div className="space-y-1">
+                                            {formData.highlights.map((highlight, index) => (
+                                                <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                                                    <span className="flex-1 text-sm">• {highlight}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                highlights: prev.highlights?.filter((_, i) => i !== index) || []
+                                                            }));
+                                                        }}
+                                                        className="p-1 hover:bg-error/10 rounded"
+                                                    >
+                                                        <Icon name="XMarkIcon" size={16} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Specifications */}
+                            <div>
+                                <label className="block caption text-muted-foreground mb-2">
+                                    Specifications
+                                </label>
+                                <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={newSpecKey}
+                                            onChange={(e) => setNewSpecKey(e.target.value)}
+                                            className="flex-1 h-10 px-4 bg-input border border-border rounded-lg text-sm"
+                                            placeholder="Key (e.g., Material)"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={newSpecValue}
+                                            onChange={(e) => setNewSpecValue(e.target.value)}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    if (newSpecKey.trim() && newSpecValue.trim()) {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            specifications: {
+                                                                ...(prev.specifications || {}),
+                                                                [newSpecKey.trim()]: newSpecValue.trim()
+                                                            }
+                                                        }));
+                                                        setNewSpecKey('');
+                                                        setNewSpecValue('');
+                                                    }
+                                                }
+                                            }}
+                                            className="flex-1 h-10 px-4 bg-input border border-border rounded-lg text-sm"
+                                            placeholder="Value (e.g., Leather)"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (newSpecKey.trim() && newSpecValue.trim()) {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        specifications: {
+                                                            ...(prev.specifications || {}),
+                                                            [newSpecKey.trim()]: newSpecValue.trim()
+                                                        }
+                                                    }));
+                                                    setNewSpecKey('');
+                                                    setNewSpecValue('');
+                                                }
+                                            }}
+                                            className="px-4 h-10 bg-primary text-primary-foreground rounded-lg text-sm font-medium"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                    {formData.specifications && Object.keys(formData.specifications).length > 0 && (
+                                        <div className="space-y-1">
+                                            {Object.entries(formData.specifications).map(([key, value]) => (
+                                                <div key={key} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                                                    <span className="text-sm font-medium">{key}:</span>
+                                                    <span className="flex-1 text-sm text-muted-foreground">{value}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setFormData(prev => {
+                                                                const newSpecs = { ...(prev.specifications || {}) };
+                                                                delete newSpecs[key];
+                                                                return { ...prev, specifications: newSpecs };
+                                                            });
+                                                        }}
+                                                        className="p-1 hover:bg-error/10 rounded"
+                                                    >
+                                                        <Icon name="XMarkIcon" size={16} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -461,18 +619,19 @@ const ProductEditModal = ({
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-end gap-3 p-6 border-t border-border">
+                    {/* Footer - Sticky */}
+                    <div className="sticky bottom-0 z-10 bg-card flex gap-3 p-4 sm:p-6 border-t border-border rounded-b-lg sm:rounded-b-luxury">
                         <button
                             onClick={onClose}
-                            className="h-12 px-6 bg-muted text-foreground rounded-luxury font-body text-base font-medium transition-luxury hover:bg-muted/80"
+                            className="flex-1 sm:flex-none h-12 px-6 bg-muted text-foreground rounded-luxury font-body text-base font-medium transition-luxury hover:bg-muted/80 active:scale-[0.97]"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSave}
-                            className="h-12 px-6 bg-accent text-accent-foreground rounded-luxury font-body text-base font-medium transition-spring hover:shadow-luxury active:scale-[0.97]"
+                            className="flex-1 sm:flex-none h-12 px-6 bg-primary text-primary-foreground rounded-luxury font-body text-base font-medium transition-spring hover:shadow-luxury active:scale-[0.97]"
                         >
-                            Save Changes
+                            {product ? 'Save Changes' : 'Add Product'}
                         </button>
                     </div>
                 </div>

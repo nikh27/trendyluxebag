@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import AdminNavigation from '@/components/common/AdminNavigation';
-import MobileNavigation from '@/components/common/MobileNavigation';
 import UserManagementInteractive from './components/UserManagementInteractive';
 
 export const metadata: Metadata = {
@@ -15,12 +14,9 @@ export default function AdminUserManagementPage() {
       <AdminNavigation />
 
       {/* Main Content */}
-      <div className="ml-72">
+      <div className="ml-20 lg:ml-72 transition-all duration-300">
         <UserManagementInteractive />
       </div>
-
-      {/* Mobile Navigation */}
-      <MobileNavigation />
     </div>
   );
 }
