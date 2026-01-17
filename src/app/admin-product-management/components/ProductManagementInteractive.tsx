@@ -6,23 +6,31 @@ import ProductTableRow from './ProductTableRow';
 import ProductCard from './ProductCard';
 import ProductEditModal from './ProductEditModal';
 import BulkActionsDropdown from './BulkActionsDropdown';
+import { getAllProducts, deleteProduct, updateProduct } from '@/services/productService';
 
 interface Product {
   id: string;
   name: string;
   category: string;
+  categoryName: string;
   price: number;
+  discount?: number;
   status: 'active' | 'draft' | 'archived';
   image: string;
   alt: string;
-  stock: number;
   description: string;
-  images: Array<{ url: string; alt: string; }>;
-  link?: string;
-  isNew?: boolean;
-  isBestseller?: boolean;
-  isLimited?: boolean;
-  isBestSale?: boolean;
+  images: Array<{ url: string; alt: string; isPrimary?: boolean; displayOrder?: number; }>;
+  productLink?: string;
+  keyHighlights?: string[];
+  specifications?: Record<string, string>;
+  tags?: {
+    isNew?: boolean;
+    isBestseller?: boolean;
+    isLimited?: boolean;
+    isBestSale?: boolean;
+  };
+  createdAt: string;
+  updatedAt?: string;
 }
 
 const ProductManagementInteractive = () => {
@@ -31,177 +39,68 @@ const ProductManagementInteractive = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock'>('name');
+  const [sortBy, setSortBy] = useState<'name' | 'price'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [isLoading, setIsLoading] = useState(true);
+  const [categoryFilters, setCategoryFilters] = useState<string[]>(['all']);
 
   useEffect(() => {
     setIsHydrated(true);
 
-    const mockProducts: Product[] = [
-      {
-        id: 'PRD001',
-        name: 'Classic Leather Tote',
-        category: 'Tote Bags',
-        price: 299,
-        status: 'active',
-        image: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214",
-        alt: 'Elegant brown leather tote bag with gold hardware on white background',
-        stock: 45,
-        description: 'Timeless leather tote perfect for everyday use with spacious interior and premium craftsmanship',
-        images: [
-          {
-            url: "https://images.unsplash.com/photo-1600857062241-98e5dba7f214",
-            alt: 'Elegant brown leather tote bag with gold hardware on white background'
-          },
-          {
-            url: "https://images.unsplash.com/photo-1637759292654-a12cb2be085e",
-            alt: 'Close-up of brown leather tote bag showing texture and stitching details'
-          }],
+    // Fetch products from Firestore
+    const loadProducts = async () => {
+      try {
+        const fetchedProducts = await getAllProducts();
+        // Map Firestore products to component format
+        const mappedProducts = fetchedProducts.map(product => ({
+          id: product.id,
+          name: product.name,
+          category: product.categoryName || product.category,
+          categoryName: product.categoryName || '',
+          price: product.price,
+          discount: product.discount,
+          status: product.status,
+          image: product.images[0]?.url || '',
+          alt: product.images[0]?.alt || product.name,
+          description: product.description,
+          images: product.images,
+          productLink: product.productLink,
+          keyHighlights: product.keyHighlights,
+          specifications: product.specifications,
+          tags: product.tags,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt,
+        }));
 
-        link: '/product-detail',
-        isNew: true,
-        isBestseller: true
-      },
-      {
-        id: 'PRD002',
-        name: 'Evening Clutch Gold',
-        category: 'Clutches',
-        price: 189,
-        status: 'active',
-        image: "https://images.unsplash.com/photo-1601281866896-1576541e77a1",
-        alt: 'Luxurious gold metallic clutch with chain strap on marble surface',
-        stock: 28,
-        description: 'Sophisticated gold clutch with detachable chain strap for elegant evening occasions',
-        images: [
-          {
-            url: "https://images.unsplash.com/photo-1601281866896-1576541e77a1",
-            alt: 'Luxurious gold metallic clutch with chain strap on marble surface'
-          }],
+        setProducts(mappedProducts);
+        setFilteredProducts(mappedProducts);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        link: '/product-detail',
-        isBestSale: true
-      },
-      {
-        id: 'PRD003',
-        name: 'Crossbody Messenger',
-        category: 'Crossbody',
-        price: 249,
-        status: 'active',
-        image: "https://images.unsplash.com/photo-1620786514663-8c3f57ffe17c",
-        alt: 'Modern black crossbody messenger bag with adjustable strap on urban background',
-        stock: 62,
-        description: 'Versatile crossbody messenger with multiple compartments for modern lifestyle',
-        images: [
-          {
-            url: "https://images.unsplash.com/photo-1620786514663-8c3f57ffe17c",
-            alt: 'Modern black crossbody messenger bag with adjustable strap on urban background'
-          }],
+    loadProducts();
+  }, []);
 
-        link: '/product-detail',
-        isBestseller: true
-      },
-      {
-        id: 'PRD004',
-        name: 'Travel Backpack Pro',
-        category: 'Backpacks',
-        price: 349,
-        status: 'draft',
-        image: "https://images.unsplash.com/photo-1583747354150-c8d5f09e4d8a",
-        alt: 'Spacious navy blue travel backpack with laptop compartment on wooden floor',
-        stock: 18,
-        description: 'Professional travel backpack with laptop compartment and ergonomic design',
-        images: [
-          {
-            url: "https://images.unsplash.com/photo-1583747354150-c8d5f09e4d8a",
-            alt: 'Spacious navy blue travel backpack with laptop compartment on wooden floor'
-          }],
-
-        link: '/product-detail',
-        isNew: true
-      },
-      {
-        id: 'PRD005',
-        name: 'Shoulder Bag Classic',
-        category: 'Shoulder Bags',
-        price: 279,
-        status: 'active',
-        image: "https://img.rocket.new/generatedImages/rocket_gen_img_198daedf1-1767774927880.png",
-        alt: 'Elegant beige shoulder bag with gold chain detail hanging on display',
-        stock: 34,
-        description: 'Classic shoulder bag with timeless design and premium materials',
-        images: [
-          {
-            url: "https://img.rocket.new/generatedImages/rocket_gen_img_198daedf1-1767774927880.png",
-            alt: 'Elegant beige shoulder bag with gold chain detail hanging on display'
-          }],
-
-        link: '/product-detail',
-        isLimited: true
-      },
-      {
-        id: 'PRD006',
-        name: 'Mini Crossbody',
-        category: 'Crossbody',
-        price: 159,
-        status: 'active',
-        image: "https://images.unsplash.com/photo-1713425885987-fa917f173fa9",
-        alt: 'Compact red mini crossbody bag with gold hardware on white surface',
-        stock: 52,
-        description: 'Compact crossbody perfect for essentials with adjustable strap',
-        images: [
-          {
-            url: "https://images.unsplash.com/photo-1713425885987-fa917f173fa9",
-            alt: 'Compact red mini crossbody bag with gold hardware on white surface'
-          }],
-
-        link: '/product-detail'
-      },
-      {
-        id: 'PRD007',
-        name: 'Weekend Tote Large',
-        category: 'Tote Bags',
-        price: 329,
-        status: 'archived',
-        image: "https://img.rocket.new/generatedImages/rocket_gen_img_12e3fa5ba-1765572948306.png",
-        alt: 'Large canvas tote bag with leather handles perfect for weekend trips',
-        stock: 0,
-        description: 'Spacious weekend tote with durable canvas and leather accents',
-        images: [
-          {
-            url: "https://img.rocket.new/generatedImages/rocket_gen_img_12e3fa5ba-1765572948306.png",
-            alt: 'Large canvas tote bag with leather handles perfect for weekend trips'
-          }],
-
-        link: '/product-detail'
-      },
-      {
-        id: 'PRD008',
-        name: 'Designer Clutch Pearl',
-        category: 'Clutches',
-        price: 399,
-        status: 'active',
-        image: "https://images.unsplash.com/photo-1608368553807-622b422ee2c0",
-        alt: 'Luxury pearl-embellished clutch with crystal clasp on velvet background',
-        stock: 12,
-        description: 'Exclusive designer clutch with pearl embellishments and crystal details',
-        images: [
-          {
-            url: "https://images.unsplash.com/photo-1608368553807-622b422ee2c0",
-            alt: 'Luxury pearl-embellished clutch with crystal clasp on velvet background'
-          }],
-
-        link: '/product-detail',
-        isLimited: true,
-        isBestSale: true
-      }];
-
-
-    setProducts(mockProducts);
-    setFilteredProducts(mockProducts);
+  useEffect(() => {
+    const loadCategoryFilters = async () => {
+      try {
+        const { getActiveCategories } = await import('@/services/categoryService');
+        const cats = await getActiveCategories();
+        if (cats.length > 0) {
+          setCategoryFilters(['all', ...cats.map(c => c.name)]);
+        }
+      } catch (error) {
+        console.error('Error loading category filters:', error);
+      }
+    };
+    loadCategoryFilters();
   }, []);
 
   useEffect(() => {
@@ -227,8 +126,6 @@ const ProductManagementInteractive = () => {
         comparison = a.name.localeCompare(b.name);
       } else if (sortBy === 'price') {
         comparison = a.price - b.price;
-      } else if (sortBy === 'stock') {
-        comparison = a.stock - b.stock;
       }
       return sortOrder === 'asc' ? comparison : -comparison;
     });
@@ -247,51 +144,76 @@ const ProductManagementInteractive = () => {
 
   }
 
-  const categories = [
-    'all',
-    'Tote Bags',
-    'Clutches',
-    'Shoulder Bags',
-    'Crossbody',
-    'Backpacks',
-    'Travel Bags'];
-
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setIsModalOpen(true);
   };
 
-  const handleDelete = (productId: string) => {
+  const handleDelete = async (productId: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
-      setSelectedProducts((prev) => prev.filter((id) => id !== productId));
+      try {
+        await deleteProduct(productId);
+        setProducts((prev) => prev.filter((p) => p.id !== productId));
+        setSelectedProducts((prev) => prev.filter((id) => id !== productId));
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Failed to delete product. Please try again.');
+      }
     }
   };
 
-  const handleToggleStatus = (productId: string) => {
-    setProducts((prev) =>
-      prev.map((p) => {
-        if (p.id === productId) {
-          const statusOrder: Array<'active' | 'draft' | 'archived'> = [
-            'active',
-            'draft',
-            'archived'];
+  const handleToggleStatus = async (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
 
-          const currentIndex = statusOrder.indexOf(p.status);
-          const nextStatus =
-            statusOrder[(currentIndex + 1) % statusOrder.length];
-          return { ...p, status: nextStatus };
-        }
-        return p;
-      })
-    );
+    // Only toggle between active and draft
+    const newStatus = product.status === 'active' ? 'draft' : 'active';
+
+    try {
+      await updateProduct(productId, { status: newStatus });
+      setProducts(prev => prev.map(p =>
+        p.id === productId ? { ...p, status: newStatus } : p
+      ));
+    } catch (error) {
+      console.error('Error updating product status:', error);
+    }
   };
 
-  const handleSaveProduct = (updatedProduct: Product) => {
-    setProducts((prev) =>
-      prev.map((p) => p.id === updatedProduct.id ? updatedProduct : p)
-    );
+  const handleSaveProduct = async () => {
+    // Reload products after save
+    setIsLoading(true);
+    try {
+      const fetchedProducts = await getAllProducts();
+      const mappedProducts = fetchedProducts.map(product => ({
+        id: product.id,
+        name: product.name,
+        category: product.categoryName || product.category,
+        categoryName: product.categoryName || '',
+        price: product.price,
+        discount: product.discount,
+        status: product.status,
+        image: product.images[0]?.url || '',
+        alt: product.images[0]?.alt || product.name,
+        description: product.description,
+        images: product.images,
+        productLink: product.productLink,
+        keyHighlights: product.keyHighlights,
+        specifications: product.specifications,
+        tags: product.tags,
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+      }));
+
+      setProducts(mappedProducts);
+      setFilteredProducts(mappedProducts);
+      setIsModalOpen(false);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error('Error reloading products:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleToggleSelect = (productId: string) => {
@@ -331,7 +253,7 @@ const ProductManagementInteractive = () => {
     setSelectedProducts([]);
   };
 
-  const handleSort = (field: 'name' | 'price' | 'stock') => {
+  const handleSort = (field: 'name' | 'price') => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -347,19 +269,7 @@ const ProductManagementInteractive = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
-              setEditingProduct({
-                id: `PRD${String(products.length + 1).padStart(3, '0')}`,
-                name: '',
-                category: 'Tote Bags',
-                price: 0,
-                status: 'draft',
-                image: '',
-                alt: '',
-                stock: 0,
-                description: '',
-                images: [],
-                link: ''
-              });
+              setEditingProduct(null); // Pass null for new product
               setIsModalOpen(true);
             }}
             className="flex items-center gap-2 h-12 px-6 bg-accent text-accent-foreground rounded-luxury font-body text-base font-medium transition-spring hover:shadow-luxury active:scale-[0.97]">
@@ -405,21 +315,23 @@ const ProductManagementInteractive = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-3 overflow-x-auto scrollbar-luxury pb-2">
-        {categories.map((cat) =>
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 rounded-luxury font-body text-sm font-medium whitespace-nowrap transition-luxury ${selectedCategory === cat ?
+      {/* Filters - Only show if there are categories */}
+      {categoryFilters.length > 1 && (
+        <div className="flex items-center gap-3 overflow-x-auto scrollbar-luxury pb-2">
+          {categoryFilters.map((cat) =>
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-2 rounded-luxury font-body text-sm font-medium whitespace-nowrap transition-luxury ${selectedCategory === cat ?
                 'bg-primary text-primary-foreground' :
                 'bg-muted text-foreground hover:bg-muted/80'}`
-            }>
+              }>
 
-            {cat === 'all' ? 'All Categories' : cat}
-          </button>
-        )}
-      </div>
+              {cat === 'all' ? 'All Categories' : cat}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Desktop Table View */}
       {viewMode === 'table' &&
@@ -455,34 +367,18 @@ const ProductManagementInteractive = () => {
                       }
                     </button>
                   </th>
-                  <th className="p-4 text-left">
+                  <th className="p-4 text-left w-1/5">
                     <span className="font-body text-sm font-medium text-foreground">
                       Category
                     </span>
                   </th>
-                  <th className="p-4 text-left">
+                  <th className="p-4 text-left w-1/5">
                     <button
                       onClick={() => handleSort('price')}
                       className="flex items-center gap-2 font-body text-sm font-medium text-foreground transition-luxury hover:text-primary">
 
                       <span>Price</span>
                       {sortBy === 'price' &&
-                        <Icon
-                          name={
-                            sortOrder === 'asc' ? 'ChevronUpIcon' : 'ChevronDownIcon'
-                          }
-                          size={16} />
-
-                      }
-                    </button>
-                  </th>
-                  <th className="p-4 text-left">
-                    <button
-                      onClick={() => handleSort('stock')}
-                      className="flex items-center gap-2 font-body text-sm font-medium text-foreground transition-luxury hover:text-primary">
-
-                      <span>Stock</span>
-                      {sortBy === 'stock' &&
                         <Icon
                           name={
                             sortOrder === 'asc' ? 'ChevronUpIcon' : 'ChevronDownIcon'

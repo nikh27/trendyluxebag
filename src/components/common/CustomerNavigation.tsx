@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
-import { getCurrentUser, mockLogout, type User } from '@/utils/mockAuth';
+import { onAuthChange, logout } from '@/services/authService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 
 interface CustomerNavigationProps {
@@ -15,16 +17,27 @@ const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    setUser(getCurrentUser());
+    // Listen to Firebase auth state
+    const unsubscribe = onAuthChange(async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        if (userDoc.exists()) {
+          setUser(userDoc.data());
+        }
+      } else {
+        setUser(null);
+      }
+    });
+    return () => unsubscribe();
   }, []);
 
-  const handleLogout = () => {
-    mockLogout();
+  const handleLogout = async () => {
+    await logout();
     setUser(null);
     setIsProfileOpen(false);
     router.push('/home');
@@ -111,25 +124,79 @@ const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
-            <button
+            <Link
+              href="/favorites"
               className="p-2 rounded-luxury transition-luxury hover:bg-muted"
-              aria-label="Search"
+              aria-label="Favorites"
             >
-              <Icon name="MagnifyingGlassIcon" size={24} />
-            </button>
-            <button
-              className="p-2 rounded-luxury transition-luxury hover:bg-muted"
-              aria-label="Account"
-            >
-              <Icon name="UserIcon" size={24} />
-            </button>
-            <button
-              className="relative p-2 rounded-luxury transition-luxury hover:bg-muted"
-              aria-label="Shopping cart"
-            >
-              <Icon name="ShoppingBagIcon" size={24} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full" />
-            </button>
+              <Icon name="HeartIcon" size={24} />
+            </Link>
+
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 p-2 rounded-luxury transition-luxury hover:bg-muted"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <span className="text-sm font-semibold text-primary">
+                      {(user.fullName && user.fullName.charAt(0).toUpperCase()) || (user.name && user.name.charAt(0).toUpperCase()) || 'U'}
+                    </span>
+                  </div>
+                </button>
+
+                {isProfileOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)} />
+                    <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-lg shadow-luxury-lg z-50 py-2">
+                      <div className="px-4 py-3 border-b border-border">
+                        <p className="font-medium text-foreground">{user.fullName || user.name}</p>
+                        <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <Link
+                        href="/account"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-muted transition-all"
+                      >
+                        <Icon name="UserIcon" size={18} />
+                        <span className="text-sm">My Account</span>
+                      </Link>
+                      <Link
+                        href="/favorites"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-muted transition-all"
+                      >
+                        <Icon name="HeartIcon" size={18} />
+                        <span className="text-sm">Favorites</span>
+                      </Link>
+                      <div className="border-t border-border my-2" />
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-error/10 text-error transition-all"
+                      >
+                        <Icon name="ArrowRightOnRectangleIcon" size={18} />
+                        <span className="text-sm">Logout</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-foreground hover:text-primary font-medium transition-all"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:shadow-lg transition-all"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}

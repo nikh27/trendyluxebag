@@ -43,7 +43,18 @@ export const signUp = async (
             createdAt: new Date().toISOString(),
         };
 
-        await setDoc(doc(db, 'users', firebaseUser.uid), user);
+        // Create user document in Firestore with additional fields
+        await setDoc(doc(db, 'users', firebaseUser.uid), {
+            id: firebaseUser.uid,
+            fullName: name,
+            email: email,
+            phoneNumber: '',
+            avatar: firebaseUser.photoURL || null,
+            role: 'user', // Default role is 'user', admin must be set manually
+            favorites: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        });
 
         return user;
     } catch (error: any) {
@@ -72,7 +83,18 @@ export const signIn = async (email: string, password: string): Promise<User> => 
                 avatar: firebaseUser.photoURL || '/images/default-avatar.png',
                 createdAt: new Date().toISOString(),
             };
-            await setDoc(doc(db, 'users', firebaseUser.uid), user);
+
+            await setDoc(doc(db, 'users', firebaseUser.uid), {
+                id: firebaseUser.uid,
+                fullName: firebaseUser.displayName || 'User',
+                email: firebaseUser.email || '',
+                phoneNumber: '',
+                avatar: firebaseUser.photoURL || null,
+                role: 'user', // Default role
+                favorites: [],
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
             return user;
         }
     } catch (error: any) {
@@ -102,7 +124,18 @@ export const signInWithGoogle = async (): Promise<User> => {
                 avatar: firebaseUser.photoURL || '/images/default-avatar.png',
                 createdAt: new Date().toISOString(),
             };
-            await setDoc(doc(db, 'users', firebaseUser.uid), user);
+
+            await setDoc(doc(db, 'users', firebaseUser.uid), {
+                id: firebaseUser.uid,
+                fullName: firebaseUser.displayName || 'User',
+                email: firebaseUser.email || '',
+                phoneNumber: '',
+                avatar: firebaseUser.photoURL || null,
+                role: 'user', // Default role
+                favorites: [],
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
             return user;
         }
     } catch (error: any) {

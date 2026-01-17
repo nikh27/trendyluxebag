@@ -12,7 +12,7 @@ import { db } from '@/lib/firebase';
 
 export default function AccountPage() {
     const router = useRouter();
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<any>(null);
     const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'addresses'>('profile');
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
@@ -20,32 +20,61 @@ export default function AccountPage() {
         email: '',
         phone: '',
     });
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
-        const currentUser = getCurrentUser();
-        if (!currentUser) {
-            router.push('/login');
-        } else {
-            setUser(currentUser);
-            setFormData({
-                name: currentUser.name,
-                email: currentUser.email,
-                phone: '',
-            });
-        }
+        // Listen to auth state changes
+        const unsubscribe = onAuthChange(async (firebaseUser) => {
+            if (!firebaseUser) {
+                router.push('/login');
+            } else {
+                // Get user data from Firestore
+                const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    setUser(userData);
+                    setFormData({
+                        name: userData.fullName || userData.name || '',
+                        email: userData.email || '',
+                        phone: userData.phoneNumber || '',
+                    });
+                }
+            }
+        });
+
+        return () => unsubscribe();
     }, [router]);
 
-    const handleLogout = () => {
-        mockLogout();
+    const handleLogout = async () => {
+        await logout();
         router.push('/home');
     };
 
-    const handleSaveProfile = () => {
-        if (user) {
-            const updatedUser = { ...user, name: formData.name, email: formData.email };
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            setUser(updatedUser);
+    const handleSaveProfile = async () => {
+        if (!user) return;
+
+        setIsSaving(true);
+        try {
+            // Update user document in Firestore
+            await updateDoc(doc(db, 'users', user.id), {
+                fullName: formData.name,
+                phoneNumber: formData.phone,
+                updatedAt: new Date(),
+            });
+
+            // Update local state
+            setUser({
+                ...user,
+                fullName: formData.name,
+                phoneNumber: formData.phone,
+            });
+
             setIsEditing(false);
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('Failed to update profile. Please try again.');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -134,12 +163,17 @@ export default function AccountPage() {
                                 <div className="flex items-center gap-6 mb-8 pb-8 border-b border-border">
                                     <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
                                         <span className="text-4xl font-bold text-primary">
-                                            {user.name.charAt(0).toUpperCase()}
+                                            {(user.fullName && user.fullName.charAt(0).toUpperCase()) || (user.name && user.name.charAt(0).toUpperCase()) || 'U'}
                                         </span>
                                     </div>
                                     <div>
-                                        <h3 className="font-heading text-xl font-semibold text-foreground">{user.name}</h3>
+                                        <h3 className="font-heading text-xl font-semibold text-foreground">{user.fullName || user.name}</h3>
                                         <p className="text-muted-foreground">{user.email}</p>
+                                        {user.role === 'admin' && (
+                                            <span className="inline-block mt-2 px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
+                                                Admin
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
 
@@ -161,10 +195,10 @@ export default function AccountPage() {
                                         <input
                                             type="email"
                                             value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            disabled={!isEditing}
-                                            className="w-full h-12 px-4 bg-input border border-border rounded-lg text-foreground disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary"
+                                            disabled
+                                            className="w-full h-12 px-4 bg-input border border-border rounded-lg text-foreground opacity-60 cursor-not-allowed"
                                         />
+                                        <p className="mt-1 text-xs text-muted-foreground">Email cannot be changed</p>
                                     </div>
 
                                     <div>
@@ -183,20 +217,22 @@ export default function AccountPage() {
                                         <div className="flex gap-3 pt-4">
                                             <button
                                                 onClick={handleSaveProfile}
-                                                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:shadow-lg transition-all"
+                                                disabled={isSaving}
+                                                className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50"
                                             >
-                                                Save Changes
+                                                {isSaving ? 'Saving...' : 'Save Changes'}
                                             </button>
                                             <button
                                                 onClick={() => {
                                                     setIsEditing(false);
                                                     setFormData({
-                                                        name: user.name,
-                                                        email: user.email,
-                                                        phone: '',
+                                                        name: user.fullName || user.name || '',
+                                                        email: user.email || '',
+                                                        phone: user.phoneNumber || '',
                                                     });
                                                 }}
-                                                className="px-6 py-3 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-all"
+                                                disabled={isSaving}
+                                                className="px-6 py-3 bg-muted text-foreground rounded-lg font-medium hover:bg-muted/80 transition-all disabled:opacity-50"
                                             >
                                                 Cancel
                                             </button>

@@ -33,11 +33,11 @@ export interface Product {
     createdAt: string;
 }
 
-// Get all active products
+// Get all products (no filter to avoid index requirement)
 export const getAllProducts = async (): Promise<Product[]> => {
     try {
         const productsRef = collection(db, 'products');
-        const q = query(productsRef, where('status', '==', 'active'), orderBy('createdAt', 'desc'));
+        const q = query(productsRef, orderBy('createdAt', 'desc'));
         const snapshot = await getDocs(q);
 
         return snapshot.docs.map(doc => ({

@@ -20,18 +20,17 @@ export default function LoginPage() {
         setError('');
         setIsLoading(true);
 
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        const user = mockLogin(email, password);
-
-        if (user) {
+        try {
+            // Use Firebase Authentication
+            await signIn(email, password);
+            // Success! Redirect to home
             router.push('/home');
-        } else {
-            setError('Invalid email or password. Please try again.');
+        } catch (error: any) {
+            console.error('Login error:', error);
+            setError(error.message || 'Invalid email or password. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
     };
 
     return (

@@ -44,17 +44,18 @@ export default function SignupPage() {
         }
 
         setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const user = mockSignup(formData.name, formData.email, formData.password);
-
-        if (user) {
+        try {
+            // Use Firebase Authentication
+            await signUp(formData.name, formData.email, formData.password);
+            // Success! Redirect to home
             router.push('/home');
-        } else {
-            setError('Failed to create account. Please try again.');
+        } catch (error: any) {
+            console.error('Signup error:', error);
+            setError(error.message || 'Failed to create account. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
     };
 
     return (

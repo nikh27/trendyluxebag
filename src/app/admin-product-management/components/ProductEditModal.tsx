@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/AppIcon';
 import AppImage from '@/components/ui/AppImage';
+import { getActiveCategories, type Category } from '@/services/categoryService';
+import { addProduct, updateProduct } from '@/services/productService';
 
 interface Product {
     id: string;
@@ -62,6 +64,8 @@ const ProductEditModal = ({
     const [newHighlight, setNewHighlight] = useState('');
     const [newSpecKey, setNewSpecKey] = useState('');
     const [newSpecValue, setNewSpecValue] = useState('');
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         if (product) {
@@ -69,16 +73,18 @@ const ProductEditModal = ({
         }
     }, [product]);
 
+    useEffect(() => {
+        // Load categories from Firestore
+        const loadCategories = async () => {
+            const fetchedCategories = await getActiveCategories();
+            setCategories(fetchedCategories);
+        };
+        loadCategories();
+    }, []);
+
     if (!isOpen || !formData) return null;
 
-    const categories = [
-        'Tote Bags',
-        'Clutches',
-        'Shoulder Bags',
-        'Crossbody',
-        'Backpacks',
-        'Travel Bags',
-    ];
+    // Categories are now loaded from Firestore in useEffect
 
     const handleInputChange = (
         field: keyof Product,
@@ -114,7 +120,7 @@ const ProductEditModal = ({
         }));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const newErrors: Record<string, string> = {};
 
         if (!formData.name.trim()) {
@@ -122,6 +128,9 @@ const ProductEditModal = ({
         }
         if (!formData.description.trim()) {
             newErrors.description = 'Description is required';
+        }
+        if (!formData.category) {
+            newErrors.category = 'Category is required';
         }
         if (formData.price <= 0) {
             newErrors.price = 'Price must be greater than 0';
@@ -135,8 +144,54 @@ const ProductEditModal = ({
             return;
         }
 
-        onSave(formData);
-        onClose();
+        setIsSaving(true);
+
+        try {
+            // Find category name from slug
+            const category = categories.find(c => c.slug === formData.category);
+
+            // Prepare product data for Firestore
+            const productData = {
+                name: formData.name,
+                description: formData.description,
+                category: formData.category,  // category slug
+                categoryName: category?.name || formData.category,
+                price: formData.price,
+                discount: formData.discount || 0,
+                productLink: formData.link || '',
+                status: formData.status,
+                keyHighlights: formData.highlights || [],
+                specifications: formData.specifications || {},
+                tags: {
+                    isNew: formData.isNew || false,
+                    isBestseller: formData.isBestseller || false,
+                    isLimited: formData.isLimited || false,
+                    isBestSale: formData.isBestSale || false,
+                },
+                images: formData.images.map((img, idx) => ({
+                    url: img.url,
+                    alt: img.alt || formData.name,
+                    isPrimary: idx === 0,
+                    displayOrder: idx + 1,
+                })),
+            };
+
+            if (product) {
+                // Update existing product
+                await updateProduct(product.id, productData);
+            } else {
+                // Create new product
+                await addProduct(productData);
+            }
+
+            onSave(formData);
+            onClose();
+        } catch (error) {
+            console.error('Error saving product:', error);
+            alert('Failed to save product. Please try again.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -223,17 +278,19 @@ const ProductEditModal = ({
                                     <select
                                         id="product-category"
                                         value={formData.category}
-                                        onChange={(e) =>
-                                            handleInputChange('category', e.target.value)
-                                        }
+                                        onChange={(e) => handleInputChange('category', e.target.value)}
                                         className="w-full h-12 px-4 bg-input border border-border rounded-luxury font-body text-base transition-luxury focus:outline-none focus:ring-2 focus:ring-ring"
                                     >
-                                        {categories.map((cat) => (
-                                            <option key={cat} value={cat}>
-                                                {cat}
+                                        <option value="">Select a category</option>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.slug}>
+                                                {category.name}
                                             </option>
                                         ))}
                                     </select>
+                                    {errors.category && (
+                                        <p className="caption text-error mt-1">{errors.category}</p>
+                                    )}
                                 </div>
 
                                 <div>

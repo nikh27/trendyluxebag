@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
 import AppImage from '@/components/ui/AppImage';
 
@@ -41,6 +42,7 @@ const ProductTableRow = ({
     isSelected = false,
     onToggleSelect,
 }: ProductTableRowProps) => {
+    const router = useRouter();
     const [showActions, setShowActions] = useState(false);
 
     const getStatusColor = (status: string) => {
@@ -56,8 +58,18 @@ const ProductTableRow = ({
         }
     };
 
+    const handleRowClick = (e: React.MouseEvent) => {
+        // Don't navigate if clicking checkbox or action buttons
+        const target = e.target as HTMLElement;
+        if (target.closest('input, button')) return;
+        router.push(`/product-detail?id=${product.id}`);
+    };
+
     return (
-        <tr className="border-b border-border hover:bg-muted/50 transition-luxury">
+        <tr
+            className="border-b border-border hover:bg-muted/50 transition-luxury cursor-pointer"
+            onClick={handleRowClick}
+        >
             {onToggleSelect && (
                 <td className="p-4">
                     <input
@@ -81,7 +93,6 @@ const ProductTableRow = ({
                         <div className="font-body text-sm font-medium text-foreground truncate">
                             {product.name}
                         </div>
-                        <div className="caption text-muted-foreground">ID: {product.id}</div>
                         {(product.isNew || product.isBestseller || product.isLimited || product.isBestSale) && (
                             <div className="flex flex-wrap gap-1 mt-1">
                                 {product.isNew && (
@@ -113,9 +124,20 @@ const ProductTableRow = ({
                 <span className="font-body text-sm text-foreground">{product.category}</span>
             </td>
             <td className="px-6 py-4">
-                <span className="data-text text-base font-medium text-foreground">
-                    Rs {product.price.toLocaleString()}
-                </span>
+                {product.discount ? (
+                    <div className="flex flex-col gap-1">
+                        <span className="text-sm text-muted-foreground line-through">
+                            ₹{product.price.toLocaleString()}
+                        </span>
+                        <span className="data-text text-base font-medium text-foreground">
+                            ₹{(product.price - product.discount).toLocaleString()}
+                        </span>
+                    </div>
+                ) : (
+                    <span className="data-text text-base font-medium text-foreground">
+                        ₹{product.price.toLocaleString()}
+                    </span>
+                )}
             </td>
             <td className="p-4">
                 <button

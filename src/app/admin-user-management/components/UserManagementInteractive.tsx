@@ -1,21 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
 import UserTableRow from './UserTableRow';
 import UserMobileCard from './UserMobileCard';
 import UserStatsCard from './UserStatsCard';
 import ConfirmationModal from './ConfirmationModal';
+import { getAllUsers, updateUserRole, type User } from '@/services/userService';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string;
-  avatarAlt: string;
-  role: 'user' | 'admin';
+interface UserWithStatus extends User {
   status: 'active' | 'inactive' | 'suspended';
   registeredDate: string;
+  avatarAlt: string;
 }
 
 interface UserStats {
@@ -34,7 +31,10 @@ interface UserStats {
 }
 
 const UserManagementInteractive = () => {
+  const router = useRouter();
   const [isHydrated, setIsHydrated] = useState(false);
+  const [users, setUsers] = useState<UserWithStatus[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'user' | 'admin'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'suspended'>('all');
@@ -49,107 +49,49 @@ const UserManagementInteractive = () => {
     newStatus?: 'active' | 'inactive' | 'suspended';
   } | null>(null);
 
-  const mockUsers: User[] = [
-  {
-    id: '1',
-    name: 'Sarah Johnson',
-    email: 'sarah.johnson@example.com',
-    avatar: "https://img.rocket.new/generatedImages/rocket_gen_img_103b528db-1763293982935.png",
-    avatarAlt: 'Professional woman with long brown hair in white blouse smiling at camera',
-    role: 'admin',
-    status: 'active',
-    registeredDate: '01/15/2026'
-  },
-  {
-    id: '2',
-    name: 'Emily Chen',
-    email: 'emily.chen@example.com',
-    avatar: "https://img.rocket.new/generatedImages/rocket_gen_img_1124a4601-1763295240952.png",
-    avatarAlt: 'Asian woman with black hair in professional attire with confident expression',
-    role: 'user',
-    status: 'active',
-    registeredDate: '01/14/2026'
-  },
-  {
-    id: '3',
-    name: 'Jessica Martinez',
-    email: 'jessica.martinez@example.com',
-    avatar: "https://img.rocket.new/generatedImages/rocket_gen_img_1623c0903-1763296489854.png",
-    avatarAlt: 'Hispanic woman with curly hair in casual outfit smiling warmly',
-    role: 'user',
-    status: 'active',
-    registeredDate: '01/13/2026'
-  },
-  {
-    id: '4',
-    name: 'Amanda Williams',
-    email: 'amanda.williams@example.com',
-    avatar: "https://img.rocket.new/generatedImages/rocket_gen_img_18f15b753-1763301304170.png",
-    avatarAlt: 'Blonde woman in business casual attire with friendly smile',
-    role: 'user',
-    status: 'inactive',
-    registeredDate: '01/10/2026'
-  },
-  {
-    id: '5',
-    name: 'Rachel Thompson',
-    email: 'rachel.thompson@example.com',
-    avatar: "https://images.unsplash.com/photo-1601514001887-0e9bc13d80b8",
-    avatarAlt: 'Woman with red hair in elegant dress with sophisticated look',
-    role: 'admin',
-    status: 'active',
-    registeredDate: '01/08/2026'
-  },
-  {
-    id: '6',
-    name: 'Olivia Davis',
-    email: 'olivia.davis@example.com',
-    avatar: "https://images.unsplash.com/photo-1711688590067-538b332dba7e",
-    avatarAlt: 'Young woman with dark hair in modern outfit with bright smile',
-    role: 'user',
-    status: 'suspended',
-    registeredDate: '01/05/2026'
-  },
-  {
-    id: '7',
-    name: 'Sophia Anderson',
-    email: 'sophia.anderson@example.com',
-    avatar: "https://img.rocket.new/generatedImages/rocket_gen_img_179161fd9-1763298723409.png",
-    avatarAlt: 'Professional woman with glasses in business attire looking confident',
-    role: 'user',
-    status: 'active',
-    registeredDate: '01/03/2026'
-  },
-  {
-    id: '8',
-    name: 'Isabella Garcia',
-    email: 'isabella.garcia@example.com',
-    avatar: "https://images.unsplash.com/photo-1690622006386-5970822da733",
-    avatarAlt: 'Woman with long dark hair in casual style with natural smile',
-    role: 'user',
-    status: 'active',
-    registeredDate: '12/28/2025'
-  }];
-
-
-  const userStats: UserStats = {
-    totalUsers: '2,847',
-    totalChange: '+12.5%',
-    totalTrend: 'up',
-    activeUsers: '2,654',
-    activeChange: '+8.3%',
-    activeTrend: 'up',
-    adminUsers: '24',
-    adminChange: '+2',
-    adminTrend: 'up',
-    newThisMonth: '186',
-    newChange: '+15.2%',
-    newTrend: 'up'
-  };
-
   useEffect(() => {
     setIsHydrated(true);
+    loadUsers();
   }, []);
+
+  const loadUsers = async () => {
+    setIsLoading(true);
+    try {
+      const fetchedUsers = await getAllUsers();
+      // Map to include status and formatted date
+      const mappedUsers: UserWithStatus[] = fetchedUsers.map(user => ({
+        ...user,
+        status: 'active' as const, // All users are active by default
+        registeredDate: new Date(user.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        avatarAlt: `${user.name || user.fullName || 'User'} avatar`,
+      }));
+      setUsers(mappedUsers);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Calculate real stats from user data
+  const userStats: UserStats = {
+    totalUsers: users.length.toString(),
+    totalChange: '+0%',
+    totalTrend: 'up',
+    activeUsers: users.filter(u => u.status === 'active').length.toString(),
+    activeChange: '+0%',
+    activeTrend: 'up',
+    adminUsers: users.filter(u => u.role === 'admin').length.toString(),
+    adminChange: '+0',
+    adminTrend: 'up',
+    newThisMonth: users.filter(u => {
+      const userDate = new Date(u.createdAt);
+      const now = new Date();
+      return userDate.getMonth() === now.getMonth() && userDate.getFullYear() === now.getFullYear();
+    }).length.toString(),
+    newChange: '+0%',
+    newTrend: 'up'
+  };
 
   if (!isHydrated) {
     return (
@@ -157,7 +99,7 @@ const UserManagementInteractive = () => {
         <div className="h-8 bg-muted rounded-luxury animate-pulse w-64" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) =>
-          <div key={i} className="h-32 bg-muted rounded-luxury animate-pulse" />
+            <div key={i} className="h-32 bg-muted rounded-luxury animate-pulse" />
           )}
         </div>
         <div className="h-96 bg-muted rounded-luxury animate-pulse" />
@@ -165,10 +107,10 @@ const UserManagementInteractive = () => {
 
   }
 
-  const filteredUsers = mockUsers.filter((user) => {
+  const filteredUsers = users.filter((user) => {
     const matchesSearch =
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase());
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
     return matchesSearch && matchesRole && matchesStatus;
@@ -197,7 +139,7 @@ const UserManagementInteractive = () => {
   };
 
   const handleViewProfile = (userId: string) => {
-    console.log('View profile:', userId);
+    router.push(`/admin-user-profile?id=${userId}`);
   };
 
   const handleConfirm = () => {
@@ -215,7 +157,7 @@ const UserManagementInteractive = () => {
 
   const handleSelectUser = (userId: string) => {
     setSelectedUsers((prev) =>
-    prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
     );
   };
 
@@ -233,8 +175,7 @@ const UserManagementInteractive = () => {
     if (confirmAction.type === 'promote') {
       return {
         title: 'Change User Role',
-        message: `Are you sure you want to change this user's role to ${confirmAction.newRole}? This will ${
-        confirmAction.newRole === 'admin' ? 'grant' : 'revoke'} administrative privileges.`,
+        message: `Are you sure you want to change this user's role to ${confirmAction.newRole}? This will ${confirmAction.newRole === 'admin' ? 'grant' : 'revoke'} administrative privileges.`,
 
         confirmText: 'Change Role',
         type: 'warning' as const
@@ -366,10 +307,10 @@ const UserManagementInteractive = () => {
             {/* Results Count */}
             <div className="flex items-center justify-between">
               <div className="caption text-sm text-muted-foreground">
-                Showing {sortedUsers.length} of {mockUsers.length} users
+                Showing {sortedUsers.length} of {users.length} users
               </div>
               {selectedUsers.length > 0 &&
-              <div className="caption text-sm text-primary font-medium">
+                <div className="caption text-sm text-primary font-medium">
                   {selectedUsers.length} selected
                 </div>
               }
@@ -411,12 +352,12 @@ const UserManagementInteractive = () => {
                 </thead>
                 <tbody>
                   {sortedUsers.map((user) =>
-                  <UserTableRow
-                    key={user.id}
-                    user={user}
-                    onPromote={handlePromote}
-                    onStatusChange={handleStatusChange}
-                    onViewProfile={handleViewProfile} />
+                    <UserTableRow
+                      key={user.id}
+                      user={user}
+                      onPromote={handlePromote}
+                      onStatusChange={handleStatusChange}
+                      onViewProfile={handleViewProfile} />
 
                   )}
                 </tbody>
@@ -427,12 +368,12 @@ const UserManagementInteractive = () => {
           {/* Mobile Cards */}
           <div className="lg:hidden space-y-4">
             {sortedUsers.map((user) =>
-            <UserMobileCard
-              key={user.id}
-              user={user}
-              onPromote={handlePromote}
-              onStatusChange={handleStatusChange}
-              onViewProfile={handleViewProfile} />
+              <UserMobileCard
+                key={user.id}
+                user={user}
+                onPromote={handlePromote}
+                onStatusChange={handleStatusChange}
+                onViewProfile={handleViewProfile} />
 
             )}
           </div>
