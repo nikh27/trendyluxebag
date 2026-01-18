@@ -15,7 +15,6 @@ import {
 import { db } from '@/lib/firebase';
 
 export interface Product {
-    updatedAt: any;
     id: string;
     name: string;
     description: string;
