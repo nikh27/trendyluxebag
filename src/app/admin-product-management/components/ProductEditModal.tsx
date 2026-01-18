@@ -51,7 +51,7 @@ const ProductEditModal = ({
         alt: product?.alt || '',
         images: product?.images || [],
         link: product?.link || '',
-        highlights: product?.keyHighlights || product?.highlights || [],
+        highlights: product?.highlights || [],
         specifications: product?.specifications || {},
         isNew: product?.isNew || false,
         isBestseller: product?.isBestseller || false,
