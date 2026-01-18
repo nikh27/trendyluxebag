@@ -7,7 +7,7 @@ import UserTableRow from './UserTableRow';
 import UserMobileCard from './UserMobileCard';
 import UserStatsCard from './UserStatsCard';
 import ConfirmationModal from './ConfirmationModal';
-import { getAllUsers, updateUserRole, type User } from '@/services/userService';
+import { getAllUsers, updateUserRole, updateUserStatus, type User } from '@/services/userService';
 
 interface UserWithStatus extends User {
   status: 'active' | 'inactive' | 'suspended';
@@ -142,12 +142,40 @@ const UserManagementInteractive = () => {
     router.push(`/admin-user-profile?id=${userId}`);
   };
 
-  const handleConfirm = () => {
-    if (confirmAction) {
-      console.log('Confirmed action:', confirmAction);
+  const handleConfirm = async () => {
+    if (!confirmAction) return;
+
+    try {
+      if (confirmAction.type === 'promote' && confirmAction.userId && confirmAction.newRole) {
+        // Update role in Firestore
+        await updateUserRole(confirmAction.userId, confirmAction.newRole);
+
+        // Update local state
+        setUsers(prev => prev.map(user =>
+          user.id === confirmAction.userId
+            ? { ...user, role: confirmAction.newRole! }
+            : user
+        ));
+      } else if (confirmAction.type === 'status' && confirmAction.userId && confirmAction.newStatus) {
+        // Update status in Firestore
+        await updateUserStatus(confirmAction.userId, confirmAction.newStatus);
+
+        // Update local state
+        setUsers(prev => prev.map(user =>
+          user.id === confirmAction.userId
+            ? { ...user, status: confirmAction.newStatus! }
+            : user
+        ));
+      }
+
+      setShowConfirmModal(false);
+      setConfirmAction(null);
+    } catch (error) {
+      console.error('Error executing action:', error);
+      alert('Failed to update user. Please try again.');
+      setShowConfirmModal(false);
+      setConfirmAction(null);
     }
-    setShowConfirmModal(false);
-    setConfirmAction(null);
   };
 
   const handleCancel = () => {

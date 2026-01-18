@@ -62,3 +62,14 @@ export const updateUserRole = async (userId: string, role: 'user' | 'admin'): Pr
         throw error;
     }
 };
+
+// Update user status
+export const updateUserStatus = async (userId: string, status: 'active' | 'inactive' | 'suspended'): Promise<void> => {
+    try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, { status });
+    } catch (error) {
+        console.error('Error updating user status:', error);
+        throw error;
+    }
+};

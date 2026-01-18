@@ -39,6 +39,7 @@ const ProductCard = ({
 
     const handleWishlistToggle = (e: React.MouseEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         toggleFavorite(id);
     };
 
@@ -91,7 +92,7 @@ const ProductCard = ({
                 {/* Wishlist Button */}
                 <button
                     onClick={handleWishlistToggle}
-                    className="absolute top-4 right-4 w-10 h-10 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center transition-luxury hover:bg-background hover:scale-110 active:scale-95"
+                    className="absolute top-4 right-4 z-10 w-10 h-10 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center transition-luxury hover:bg-background hover:scale-110 active:scale-95"
                     aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
                 >
                     <Icon

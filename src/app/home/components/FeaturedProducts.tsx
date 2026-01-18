@@ -6,6 +6,7 @@ import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import AppImage from '@/components/ui/AppImage';
 import Icon from '@/components/ui/AppIcon';
+import { useFavorites } from '@/contexts/FavoritesContext';
 
 interface Product {
   id: string;
@@ -26,6 +27,7 @@ interface FeaturedProductsProps {
 const FeaturedProducts = ({ className = '' }: FeaturedProductsProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     const fetchLatestProducts = async () => {
@@ -166,11 +168,22 @@ const FeaturedProducts = ({ className = '' }: FeaturedProductsProps) => {
                 )}
 
                 {/* Quick action */}
+                {/* Quick action */}
                 <button
-                  className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent hover:text-white"
-                  onClick={(e) => e.preventDefault()}
+                  className={`absolute bottom-3 right-3 z-10 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center transition-all hover:bg-accent hover:text-white ${isFavorite(product.id) ? 'text-error' : 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100'
+                    }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFavorite(product.id);
+                  }}
                 >
-                  <Icon name="HeartIcon" size={18} />
+                  <Icon
+                    name="HeartIcon"
+                    size={18}
+                    variant={isFavorite(product.id) ? 'solid' : 'outline'}
+                    className={isFavorite(product.id) ? 'text-error hover:text-white' : ''}
+                  />
                 </button>
               </div>
 

@@ -23,6 +23,7 @@ const ProductManagementInteractive = () => {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [isLoading, setIsLoading] = useState(true);
   const [categoryFilters, setCategoryFilters] = useState<string[]>(['all']);
+  const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setIsHydrated(true);
@@ -31,24 +32,11 @@ const ProductManagementInteractive = () => {
     const loadProducts = async () => {
       try {
         const fetchedProducts = await getAllProducts();
-        // Map Firestore products to component format
+        // Preserve ALL fields from Firestore using spread operator
         const mappedProducts = fetchedProducts.map(product => ({
-          id: product.id,
-          name: product.name,
-          category: product.category,
-          price: product.price,
-          discount: product.discount,
-          status: product.status,
+          ...product, // Preserve ALL original fields
           image: product.images[0]?.url || '',
           alt: product.images[0]?.alt || product.name,
-          description: product.description,
-          images: product.images,
-          productLink: product.productLink,
-          keyHighlights: product.keyHighlights,
-          specifications: product.specifications,
-          tags: product.tags,
-          createdAt: product.createdAt,
-          updatedAt: product.updatedAt,
         }));
 
         setProducts(mappedProducts);
@@ -70,6 +58,12 @@ const ProductManagementInteractive = () => {
         const cats = await getActiveCategories();
         if (cats.length > 0) {
           setCategoryFilters(['all', ...cats.map(c => c.name)]);
+          // Create mapping: category name -> category slug (replace hyphens with underscores)
+          const mapping: Record<string, string> = {};
+          cats.forEach(c => {
+            mapping[c.name] = c.slug.replace(/-/g, '_');
+          });
+          setCategoryMap(mapping);
         }
       } catch (error) {
         console.error('Error loading category filters:', error);
@@ -92,7 +86,9 @@ const ProductManagementInteractive = () => {
     }
 
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter((p) => p.category === selectedCategory);
+      // Map category name to slug for comparison
+      const categorySlug = categoryMap[selectedCategory];
+      filtered = filtered.filter((p) => p.category === categorySlug);
     }
 
     filtered.sort((a, b) => {
@@ -161,22 +157,9 @@ const ProductManagementInteractive = () => {
     try {
       const fetchedProducts = await getAllProducts();
       const mappedProducts = fetchedProducts.map(product => ({
-        id: product.id,
-        name: product.name,
-        category: product.category,
-        price: product.price,
-        discount: product.discount,
-        status: product.status,
+        ...product, // Preserve ALL original fields
         image: product.images[0]?.url || '',
         alt: product.images[0]?.alt || product.name,
-        description: product.description,
-        images: product.images,
-        productLink: product.productLink,
-        keyHighlights: product.keyHighlights,
-        specifications: product.specifications,
-        tags: product.tags,
-        createdAt: product.createdAt,
-        updatedAt: product.updatedAt,
       }));
 
       setProducts(mappedProducts);
@@ -206,25 +189,45 @@ const ProductManagementInteractive = () => {
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (
       confirm(
         `Are you sure you want to delete ${selectedProducts.length} products?`
       )) {
-      setProducts((prev) =>
-        prev.filter((p) => !selectedProducts.includes(p.id))
-      );
-      setSelectedProducts([]);
+      try {
+        // Delete from Firestore
+        await Promise.all(
+          selectedProducts.map(productId => deleteProduct(productId))
+        );
+        // Update local state
+        setProducts((prev) =>
+          prev.filter((p) => !selectedProducts.includes(p.id))
+        );
+        setSelectedProducts([]);
+      } catch (error) {
+        console.error('Error deleting products:', error);
+        alert('Failed to delete some products. Please try again.');
+      }
     }
   };
 
-  const handleBulkStatusChange = (status: 'active' | 'draft' | 'archived') => {
-    setProducts((prev) =>
-      prev.map((p) =>
-        selectedProducts.includes(p.id) ? { ...p, status } : p
-      )
-    );
-    setSelectedProducts([]);
+  const handleBulkStatusChange = async (status: 'active' | 'draft' | 'archived') => {
+    try {
+      // Update in Firestore
+      await Promise.all(
+        selectedProducts.map(productId => updateProduct(productId, { status }))
+      );
+      // Update local state
+      setProducts((prev) =>
+        prev.map((p) =>
+          selectedProducts.includes(p.id) ? { ...p, status } : p
+        )
+      );
+      setSelectedProducts([]);
+    } catch (error) {
+      console.error('Error updating product status:', error);
+      alert('Failed to update some products. Please try again.');
+    }
   };
 
   const handleSort = (field: 'name' | 'price') => {

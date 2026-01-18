@@ -31,13 +31,13 @@ const ProductEditModal = ({
         image: product?.image || '',
         alt: product?.alt || '',
         images: product?.images || [],
-        link: product?.link || '',
-        highlights: product?.highlights || [],
+        link: (product as any)?.productLink || product?.link || '',
+        highlights: (product as any)?.keyHighlights || product?.highlights || [],
         specifications: product?.specifications || {},
-        isNew: product?.isNew || false,
-        isBestseller: product?.isBestseller || false,
-        isLimited: product?.isLimited || false,
-        isBestSale: product?.isBestSale || false,
+        isNew: (product as any)?.tags?.isNew || product?.isNew || false,
+        isBestseller: (product as any)?.tags?.isBestseller || product?.isBestseller || false,
+        isLimited: (product as any)?.tags?.isLimited || product?.isLimited || false,
+        isBestSale: (product as any)?.tags?.isBestSale || product?.isBestSale || false,
         createdAt: product?.createdAt || new Date().toISOString(),
     });
     const [imageUrl, setImageUrl] = useState('');
@@ -51,7 +51,31 @@ const ProductEditModal = ({
 
     useEffect(() => {
         if (product) {
-            setFormData(product);
+            console.log('🔍 ProductEditModal - Received product:', product);
+            // Map Firestore fields to form fields
+            const mappedFormData = {
+                id: product.id || '',
+                name: product.name || '',
+                category: product.category || '',
+                price: product.price || 0,
+                discount: product.discount || 0,
+                status: product.status || 'draft',
+                description: product.description || '',
+                image: product.image || '',
+                alt: product.alt || '',
+                images: product.images || [],
+                link: (product as any).productLink || product.link || '',  // Map productLink -> link
+                highlights: (product as any).keyHighlights || product.highlights || [],  // Map keyHighlights -> highlights
+                specifications: product.specifications || {},
+                // Map tags object to individual boolean fields
+                isNew: (product as any).tags?.isNew || product.isNew || false,
+                isBestseller: (product as any).tags?.isBestseller || product.isBestseller || false,
+                isLimited: (product as any).tags?.isLimited || product.isLimited || false,
+                isBestSale: (product as any).tags?.isBestSale || product.isBestSale || false,
+                createdAt: product.createdAt || new Date().toISOString(),
+            };
+            console.log('📝 ProductEditModal - Mapped form data:', mappedFormData);
+            setFormData(mappedFormData);
         }
     }, [product]);
 
