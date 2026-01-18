@@ -15,6 +15,7 @@ import {
 import { db } from '@/lib/firebase';
 
 export interface Product {
+    updatedAt: any;
     id: string;
     name: string;
     description: string;
@@ -39,6 +40,7 @@ export interface Product {
         isBestSale?: boolean;
     };
     createdAt: string;
+    updatedAt?: string;
 }
 
 // Get all products (no filter to avoid index requirement)
@@ -52,6 +54,7 @@ export const getAllProducts = async (): Promise<Product[]> => {
             id: doc.id,
             ...doc.data(),
             createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+            updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString(),
         })) as Product[];
     } catch (error) {
         console.error('Error fetching products:', error);
@@ -70,6 +73,7 @@ export const getProductById = async (id: string): Promise<Product | null> => {
                 id: docSnap.id,
                 ...docSnap.data(),
                 createdAt: docSnap.data().createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+                updatedAt: docSnap.data().updatedAt?.toDate?.()?.toISOString(),
             } as Product;
         }
         return null;
@@ -98,8 +102,11 @@ export const addProduct = async (product: Omit<Product, 'id' | 'createdAt'>): Pr
 export const updateProduct = async (id: string, updates: Partial<Product>): Promise<void> => {
     try {
         const docRef = doc(db, 'products', id);
-        const { createdAt, ...updateData } = updates;
-        await updateDoc(docRef, updateData);
+        const { createdAt, updatedAt, ...updateData } = updates;
+        await updateDoc(docRef, {
+            ...updateData,
+            updatedAt: Timestamp.now(),
+        });
     } catch (error) {
         console.error('Error updating product:', error);
         throw error;
