@@ -6,9 +6,9 @@ import AppImage from '@/components/ui/AppImage';
 
 interface User {
   id: string;
-  name: string;
+  name?: string;
   email: string;
-  avatar: string;
+  avatar?: string;
   avatarAlt: string;
   role: 'user' | 'admin';
   status: 'active' | 'inactive' | 'suspended';
@@ -49,14 +49,14 @@ const UserMobileCard = ({ user, onPromote, onStatusChange, onViewProfile }: User
       <div className="flex items-start gap-3">
         <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
           <AppImage
-            src={user.avatar}
+            src={user.avatar || '/images/default-avatar.png'}
             alt={user.avatarAlt}
             className="w-full h-full object-cover"
           />
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-body text-base font-medium text-foreground truncate">
-            {user.name}
+            {user.name || 'Unknown User'}
           </div>
           <div className="caption text-sm text-muted-foreground truncate">
             {user.email}

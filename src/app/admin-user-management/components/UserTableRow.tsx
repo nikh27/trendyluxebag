@@ -8,7 +8,7 @@ interface User {
   id: string;
   name?: string;
   email: string;
-  avatar: string;
+  avatar?: string;
   avatarAlt: string;
   role: 'user' | 'admin';
   status: 'active' | 'inactive' | 'suspended';
@@ -49,14 +49,14 @@ const UserTableRow = ({ user, onPromote, onStatusChange, onViewProfile }: UserTa
         <div className="flex items-center gap-3">
           <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
             <AppImage
-              src={user.avatar}
+              src={user.avatar || '/images/default-avatar.png'}
               alt={user.avatarAlt}
               className="w-full h-full object-cover"
             />
           </div>
           <div className="min-w-0">
             <div className="font-body text-sm font-medium text-foreground truncate">
-              {user.name}
+              {user.name || 'Unknown User'}
             </div>
             <div className="caption text-xs text-muted-foreground truncate">
               {user.email}
