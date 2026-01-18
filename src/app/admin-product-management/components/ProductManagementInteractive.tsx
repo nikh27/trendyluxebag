@@ -7,32 +7,7 @@ import ProductCard from './ProductCard';
 import ProductEditModal from './ProductEditModal';
 import BulkActionsDropdown from './BulkActionsDropdown';
 import { getAllProducts, deleteProduct, updateProduct } from '@/services/productService';
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  categoryName: string;
-  price: number;
-  discount?: number;
-  status: 'active' | 'draft' | 'archived';
-  image: string;
-  alt: string;
-  description: string;
-  images: Array<{ url: string; alt: string; isPrimary?: boolean; displayOrder?: number; }>;
-  productLink?: string;
-  highlights?: string[]; // Add this field
-  keyHighlights?: string[];
-  specifications?: Record<string, string>;
-  tags?: {
-    isNew?: boolean;
-    isBestseller?: boolean;
-    isLimited?: boolean;
-    isBestSale?: boolean;
-  };
-  createdAt: string;
-  updatedAt?: string;
-}
+import type { Product } from '../types/product';
 
 const ProductManagementInteractive = () => {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -60,8 +35,7 @@ const ProductManagementInteractive = () => {
         const mappedProducts = fetchedProducts.map(product => ({
           id: product.id,
           name: product.name,
-          category: product.categoryName || product.category,
-          categoryName: product.categoryName || '',
+          category: product.category,
           price: product.price,
           discount: product.discount,
           status: product.status,
@@ -189,8 +163,7 @@ const ProductManagementInteractive = () => {
       const mappedProducts = fetchedProducts.map(product => ({
         id: product.id,
         name: product.name,
-        category: product.categoryName || product.category,
-        categoryName: product.categoryName || '',
+        category: product.category,
         price: product.price,
         discount: product.discount,
         status: product.status,

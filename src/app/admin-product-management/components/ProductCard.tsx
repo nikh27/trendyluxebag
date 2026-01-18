@@ -4,25 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
 import AppImage from '@/components/ui/AppImage';
-
-interface Product {
-    id: string;
-    name: string;
-    category: string;
-    price: number;
-    discount?: number; // Discount percentage 0-100
-    status: 'active' | 'draft' | 'archived';
-    image: string;
-    alt: string;
-    stock: number;
-    description: string;
-    images: Array<{ url: string; alt: string; }>;
-    link?: string;
-    isNew?: boolean;
-    isBestseller?: boolean;
-    isLimited?: boolean;
-    isBestSale?: boolean;
-}
+import type { Product } from '../types/product';
 
 interface ProductCardProps {
     product: Product;

@@ -5,26 +5,7 @@ import Icon from '@/components/ui/AppIcon';
 import AppImage from '@/components/ui/AppImage';
 import { getActiveCategories, type Category } from '@/services/categoryService';
 import { addProduct, updateProduct } from '@/services/productService';
-
-interface Product {
-    id: string;
-    name: string;
-    category: string;
-    price: number;
-    discount?: number; // Discount percentage
-    status: 'active' | 'draft' | 'archived';
-    image: string;
-    alt: string;
-    description: string;
-    images: Array<{ url: string; alt: string }>;
-    link?: string; // External Amazon/affiliate link
-    highlights?: string[]; // Key highlights as bullet points
-    specifications?: Record<string, string>; // Key-value pairs
-    isNew?: boolean;
-    isBestseller?: boolean;
-    isLimited?: boolean;
-    isBestSale?: boolean;
-}
+import type { Product } from '../types/product';
 
 interface ProductEditModalProps {
     product: Product | null;
@@ -57,6 +38,7 @@ const ProductEditModal = ({
         isBestseller: product?.isBestseller || false,
         isLimited: product?.isLimited || false,
         isBestSale: product?.isBestSale || false,
+        createdAt: product?.createdAt || new Date().toISOString(),
     });
     const [imageUrl, setImageUrl] = useState('');
     const [imageAlt, setImageAlt] = useState('');

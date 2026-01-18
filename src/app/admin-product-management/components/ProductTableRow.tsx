@@ -4,26 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
 import AppImage from '@/components/ui/AppImage';
-
-interface Product {
-    id: string;
-    name: string;
-    category: string;
-    price: number;
-    discount?: number;
-    status: 'active' | 'draft' | 'archived';
-    image: string;
-    alt: string;
-    description: string;
-    images: Array<{ url: string; alt: string; }>;
-    link?: string;
-    highlights?: string[];
-    specifications?: Record<string, string>;
-    isNew?: boolean;
-    isBestseller?: boolean;
-    isLimited?: boolean;
-    isBestSale?: boolean;
-}
+import type { Product } from '../types/product';
 
 interface ProductTableRowProps {
     product: Product;
