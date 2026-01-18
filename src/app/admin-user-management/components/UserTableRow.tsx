@@ -6,7 +6,7 @@ import AppImage from '@/components/ui/AppImage';
 
 interface User {
   id: string;
-  name: string;
+  name?: string;
   email: string;
   avatar: string;
   avatarAlt: string;

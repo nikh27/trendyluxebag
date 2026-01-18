@@ -109,7 +109,7 @@ const UserManagementInteractive = () => {
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
@@ -119,7 +119,7 @@ const UserManagementInteractive = () => {
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     let comparison = 0;
     if (sortBy === 'name') {
-      comparison = a.name.localeCompare(b.name);
+      comparison = (a.name || '').localeCompare(b.name || '');
     } else if (sortBy === 'date') {
       comparison = new Date(a.registeredDate).getTime() - new Date(b.registeredDate).getTime();
     } else if (sortBy === 'role') {
