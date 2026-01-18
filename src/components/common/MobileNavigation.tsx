@@ -1,8 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Icon from '@/components/ui/AppIcon';
+import { onAuthChange } from '@/services/authService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface MobileNavigationProps {
   showCartBadge?: boolean;
@@ -20,6 +24,27 @@ const MobileNavigation = ({
   className = '',
 }: MobileNavigationProps) => {
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthChange(async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          if (userDoc.exists() && userDoc.data().role === 'admin') {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const isProductDetailPage = pathname === '/product-detail';
   const isAdminPage = pathname?.startsWith('/admin');
@@ -27,7 +52,10 @@ const MobileNavigation = ({
   const customerNavItems = [
     { label: 'Home', path: '/home', icon: 'HomeIcon' },
     { label: 'Shop', path: '/product-listing', icon: 'ShoppingBagIcon' },
-    { label: 'Search', path: '/search', icon: 'MagnifyingGlassIcon' },
+    // Swap Search for Admin if user is admin
+    isAdmin
+      ? { label: 'Admin', path: '/admin-dashboard', icon: 'ShieldCheckIcon' }
+      : { label: 'Search', path: '/search', icon: 'MagnifyingGlassIcon' },
     { label: 'Account', path: '/account', icon: 'UserIcon' },
     { label: 'Favorites', path: '/favorites', icon: 'HeartIcon' },
   ];
@@ -36,8 +64,8 @@ const MobileNavigation = ({
     { label: 'Dashboard', path: '/admin-dashboard', icon: 'ChartBarIcon' },
     { label: 'Products', path: '/admin-product-management', icon: 'ShoppingBagIcon' },
     { label: 'Users', path: '/admin-user-management', icon: 'UsersIcon' },
+    { label: 'Home', path: '/home', icon: 'HomeIcon' },
     { label: 'Shop', path: '/product-listing', icon: 'ShoppingCartIcon' },
-    { label: 'Favorites', path: '/favorites', icon: 'HeartIcon' },
   ];
 
   const navItems = isAdminPage ? adminNavItems : customerNavItems;

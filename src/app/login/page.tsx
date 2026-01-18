@@ -40,6 +40,15 @@ export default function LoginPage() {
 
             {/* Login Card */}
             <div className="relative w-full max-w-md">
+                {/* Close Button */}
+                <Link
+                    href="/home"
+                    className="absolute -top-2 -right-2 md:top-2 md:right-2 w-10 h-10 bg-card/90 hover:bg-card border border-border rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground transition-all shadow-lg z-10 group"
+                    aria-label="Close"
+                >
+                    <Icon name="XMarkIcon" size={20} className="group-hover:rotate-90 transition-transform" />
+                </Link>
+
                 <div className="bg-card/80 backdrop-blur-xl rounded-2xl shadow-luxury-lg border border-border/50 p-8 sm:p-10">
                     {/* Logo */}
                     <div className="text-center mb-8">

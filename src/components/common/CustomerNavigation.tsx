@@ -120,6 +120,15 @@ const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
             >
               Favorites
             </Link>
+            {user && user.role === 'admin' && (
+              <Link
+                href="/admin-dashboard"
+                className="font-body text-base text-primary font-semibold transition-luxury hover:text-primary/80 flex items-center gap-2"
+              >
+                <Icon name="ShieldCheckIcon" size={20} />
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* Desktop Actions */}
@@ -169,6 +178,19 @@ const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
                         <Icon name="HeartIcon" size={18} />
                         <span className="text-sm">Favorites</span>
                       </Link>
+                      {user.role === 'admin' && (
+                        <>
+                          <div className="border-t border-border my-2" />
+                          <Link
+                            href="/admin-dashboard"
+                            onClick={() => setIsProfileOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 hover:bg-primary/10 text-primary transition-all"
+                          >
+                            <Icon name="ShieldCheckIcon" size={18} />
+                            <span className="text-sm font-semibold">Admin Dashboard</span>
+                          </Link>
+                        </>
+                      )}
                       <div className="border-t border-border my-2" />
                       <button
                         onClick={handleLogout}
@@ -239,6 +261,18 @@ const CustomerNavigation = ({ className = '' }: CustomerNavigationProps) => {
                   </span>
                 </Link>
               ))}
+              {user && user.role === 'admin' && (
+                <Link
+                  href="/admin-dashboard"
+                  onClick={handleLinkClick}
+                  className="flex items-center gap-4 p-4 rounded-luxury transition-luxury hover:bg-primary/10 text-primary"
+                >
+                  <Icon name="ShieldCheckIcon" size={24} />
+                  <span className="font-body text-lg font-medium">
+                    Admin
+                  </span>
+                </Link>
+              )}
             </div>
 
             {/* Mobile Actions */}
