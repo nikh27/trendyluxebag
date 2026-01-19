@@ -20,9 +20,10 @@ interface UserMobileCardProps {
   onPromote: (userId: string, newRole: 'user' | 'admin') => void;
   onStatusChange: (userId: string, newStatus: 'active' | 'inactive' | 'suspended') => void;
   onViewProfile: (userId: string) => void;
+  onDelete: (userId: string, userName: string) => void;
 }
 
-const UserMobileCard = ({ user, onPromote, onStatusChange, onViewProfile }: UserMobileCardProps) => {
+const UserMobileCard = ({ user, onPromote, onStatusChange, onViewProfile, onDelete }: UserMobileCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
@@ -44,19 +45,42 @@ const UserMobileCard = ({ user, onPromote, onStatusChange, onViewProfile }: User
     return role === 'admin' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary';
   };
 
+  const getFirstName = (fullName?: string): string => {
+    if (!fullName) return 'Unknown';
+    return fullName.split(' ')[0];
+  };
+
+  const getInitials = (name?: string): string => {
+    if (!name) return '?';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return (name[0] || '?').toUpperCase();
+  };
+
+  const getInitialsColor = (name?: string): string => {
+    const colors = [
+      'bg-blue-500/10 text-blue-600',
+      'bg-green-500/10 text-green-600',
+      'bg-purple-500/10 text-purple-600',
+      'bg-pink-500/10 text-pink-600',
+      'bg-orange-500/10 text-orange-600',
+      'bg-cyan-500/10 text-cyan-600',
+    ];
+    const index = (name?.charCodeAt(0) || 0) % colors.length;
+    return colors[index];
+  };
+
   return (
     <div className="bg-card rounded-luxury p-4 shadow-luxury-sm">
       <div className="flex items-start gap-3">
-        <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-          <AppImage
-            src={user.avatar || '/images/default-avatar.png'}
-            alt={user.avatarAlt}
-            className="w-full h-full object-cover"
-          />
+        <div className={`relative w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-body text-base font-semibold ${getInitialsColor(user.name)}`}>
+          {getInitials(user.name)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="font-body text-base font-medium text-foreground truncate">
-            {user.name || 'Unknown User'}
+            {getFirstName(user.name)}
           </div>
           <div className="caption text-sm text-muted-foreground truncate">
             {user.email}
@@ -172,9 +196,17 @@ const UserMobileCard = ({ user, onPromote, onStatusChange, onViewProfile }: User
             <Icon name="EyeIcon" size={18} />
             <span>View Profile</span>
           </button>
+
+          <button
+            onClick={() => onDelete(user.id, user.name || 'Unknown User')}
+            className="w-full h-10 px-4 bg-error text-error-foreground rounded-luxury font-body text-sm font-medium transition-luxury hover:shadow-luxury active:scale-[0.97] flex items-center justify-center gap-2"
+          >
+            <Icon name="TrashIcon" size={18} />
+            <span>Delete User</span>
+          </button>
         </div>
       )}
-    </div>
+    </div >
   );
 };
 

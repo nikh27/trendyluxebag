@@ -20,9 +20,10 @@ interface UserTableRowProps {
   onPromote: (userId: string, newRole: 'user' | 'admin') => void;
   onStatusChange: (userId: string, newStatus: 'active' | 'inactive' | 'suspended') => void;
   onViewProfile: (userId: string) => void;
+  onDelete: (userId: string, userName: string) => void;
 }
 
-const UserTableRow = ({ user, onPromote, onStatusChange, onViewProfile }: UserTableRowProps) => {
+const UserTableRow = ({ user, onPromote, onStatusChange, onViewProfile, onDelete }: UserTableRowProps) => {
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showStatusMenu, setShowStatusMenu] = useState(false);
 
@@ -43,20 +44,46 @@ const UserTableRow = ({ user, onPromote, onStatusChange, onViewProfile }: UserTa
     return role === 'admin' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary';
   };
 
+  // Get first name from full name
+  const getFirstName = (fullName?: string): string => {
+    if (!fullName) return 'Unknown';
+    return fullName.split(' ')[0];
+  };
+
+  // Get initials for badge
+  const getInitials = (name?: string): string => {
+    if (!name) return '?';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return (name[0] || '?').toUpperCase();
+  };
+
+  // Get color for initials badge
+  const getInitialsColor = (name?: string): string => {
+    const colors = [
+      'bg-blue-500/10 text-blue-600',
+      'bg-green-500/10 text-green-600',
+      'bg-purple-500/10 text-purple-600',
+      'bg-pink-500/10 text-pink-600',
+      'bg-orange-500/10 text-orange-600',
+      'bg-cyan-500/10 text-cyan-600',
+    ];
+    const index = (name?.charCodeAt(0) || 0) % colors.length;
+    return colors[index];
+  };
+
   return (
     <tr className="border-b border-border transition-luxury hover:bg-muted/50">
       <td className="px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-            <AppImage
-              src={user.avatar || '/images/default-avatar.png'}
-              alt={user.avatarAlt}
-              className="w-full h-full object-cover"
-            />
+          <div className={`relative w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 font-body text-sm font-semibold ${getInitialsColor(user.name)}`}>
+            {getInitials(user.name)}
           </div>
           <div className="min-w-0">
             <div className="font-body text-sm font-medium text-foreground truncate">
-              {user.name || 'Unknown User'}
+              {getFirstName(user.name)}
             </div>
             <div className="caption text-xs text-muted-foreground truncate">
               {user.email}
@@ -152,6 +179,13 @@ const UserTableRow = ({ user, onPromote, onStatusChange, onViewProfile }: UserTa
             aria-label="View profile"
           >
             <Icon name="EyeIcon" size={18} />
+          </button>
+          <button
+            onClick={() => onDelete(user.id, user.name || 'Unknown User')}
+            className="p-2 rounded-luxury transition-luxury hover:bg-error/10 text-error"
+            aria-label="Delete user"
+          >
+            <Icon name="TrashIcon" size={18} />
           </button>
         </div>
       </td>

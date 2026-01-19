@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import ImageGallery from './ImageGallery';
 import ProductInfo from './ProductInfo';
 import ProductActions from './ProductActions';
 import RelatedProducts from './RelatedProducts';
 import Icon from '@/components/ui/AppIcon';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { getCurrentUser } from '@/services/authService';
 
 interface Product {
   id: string;
@@ -48,6 +50,7 @@ const ProductDetailInteractive = ({
   product,
   relatedProducts,
 }: ProductDetailInteractiveProps) => {
+  const router = useRouter();
   const [isHydrated, setIsHydrated] = useState(false);
   const { toggleFavorite, isFavorite } = useFavorites();
 
@@ -136,6 +139,17 @@ const ProductDetailInteractive = ({
           </button>
           <button
             onClick={() => {
+              // Check if user is authenticated
+              const currentUser = getCurrentUser();
+
+              if (!currentUser) {
+                // Not authenticated - redirect to signup with return URL
+                const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                router.push(`/signup?returnUrl=${returnUrl}`);
+                return;
+              }
+
+              // User is authenticated - proceed with buy now
               const link = product.link;
               console.log('🔗 Mobile Buy Now clicked. Link:', link);
               if (link) {

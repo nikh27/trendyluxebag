@@ -5,6 +5,7 @@ import {
     query,
     orderBy,
     updateDoc,
+    deleteDoc,
     doc,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -70,6 +71,17 @@ export const updateUserStatus = async (userId: string, status: 'active' | 'inact
         await updateDoc(userRef, { status });
     } catch (error) {
         console.error('Error updating user status:', error);
+        throw error;
+    }
+};
+
+// Delete user
+export const deleteUser = async (userId: string): Promise<void> => {
+    try {
+        const userRef = doc(db, 'users', userId);
+        await deleteDoc(userRef);
+    } catch (error) {
+        console.error('Error deleting user:', error);
         throw error;
     }
 };

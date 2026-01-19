@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Icon from '@/components/ui/AppIcon';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { getCurrentUser } from '@/services/authService';
 
 interface ProductActionsProps {
   productId: string;
@@ -10,6 +12,7 @@ interface ProductActionsProps {
 }
 
 const ProductActions = ({ productId, productLink }: ProductActionsProps) => {
+  const router = useRouter();
   const [isHydrated, setIsHydrated] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -32,6 +35,17 @@ const ProductActions = ({ productId, productLink }: ProductActionsProps) => {
   const isInWishlist = isFavorite(productId);
 
   const handleBuyNow = () => {
+    // Check if user is authenticated
+    const currentUser = getCurrentUser();
+
+    if (!currentUser) {
+      // Not authenticated - redirect to signup with return URL
+      const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+      router.push(`/signup?returnUrl=${returnUrl}`);
+      return;
+    }
+
+    // User is authenticated - proceed with buy now
     console.log('🔗 Buy Now clicked. ProductLink:', productLink);
     if (productLink) {
       console.log('✅ Opening link:', productLink);

@@ -7,7 +7,7 @@ import UserTableRow from './UserTableRow';
 import UserMobileCard from './UserMobileCard';
 import UserStatsCard from './UserStatsCard';
 import ConfirmationModal from './ConfirmationModal';
-import { getAllUsers, updateUserRole, updateUserStatus, type User } from '@/services/userService';
+import { getAllUsers, updateUserRole, updateUserStatus, deleteUser, type User } from '@/services/userService';
 
 interface UserWithStatus extends User {
   status: 'active' | 'inactive' | 'suspended';
@@ -43,8 +43,9 @@ const UserManagementInteractive = () => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
-    type: 'promote' | 'status' | 'bulk';
+    type: 'promote' | 'status' | 'delete';
     userId?: string;
+    userName?: string;
     newRole?: 'user' | 'admin';
     newStatus?: 'active' | 'inactive' | 'suspended';
   } | null>(null);
@@ -142,6 +143,11 @@ const UserManagementInteractive = () => {
     router.push(`/admin-user-profile?id=${userId}`);
   };
 
+  const handleDeleteUser = (userId: string, userName: string) => {
+    setConfirmAction({ type: 'delete', userId, userName });
+    setShowConfirmModal(true);
+  };
+
   const handleConfirm = async () => {
     if (!confirmAction) return;
 
@@ -166,6 +172,12 @@ const UserManagementInteractive = () => {
             ? { ...user, status: confirmAction.newStatus! }
             : user
         ));
+      } else if (confirmAction.type === 'delete' && confirmAction.userId) {
+        // Delete user from Firestore
+        await deleteUser(confirmAction.userId);
+
+        // Remove from local state
+        setUsers(prev => prev.filter(user => user.id !== confirmAction.userId));
       }
 
       setShowConfirmModal(false);
@@ -216,6 +228,15 @@ const UserManagementInteractive = () => {
         message: `Are you sure you want to change this user's status to ${confirmAction.newStatus}?`,
         confirmText: 'Change Status',
         type: confirmAction.newStatus === 'suspended' ? 'danger' as const : 'info' as const
+      };
+    }
+
+    if (confirmAction.type === 'delete') {
+      return {
+        title: 'Delete User',
+        message: `⚠️ Are you sure you want to permanently delete ${confirmAction.userName}? This action CANNOT be undone and will permanently remove all user data from the system.`,
+        confirmText: 'Delete User',
+        type: 'danger' as const
       };
     }
 
@@ -385,7 +406,8 @@ const UserManagementInteractive = () => {
                       user={user}
                       onPromote={handlePromote}
                       onStatusChange={handleStatusChange}
-                      onViewProfile={handleViewProfile} />
+                      onViewProfile={handleViewProfile}
+                      onDelete={handleDeleteUser} />
 
                   )}
                 </tbody>
@@ -401,7 +423,8 @@ const UserManagementInteractive = () => {
                 user={user}
                 onPromote={handlePromote}
                 onStatusChange={handleStatusChange}
-                onViewProfile={handleViewProfile} />
+                onViewProfile={handleViewProfile}
+                onDelete={handleDeleteUser} />
 
             )}
           </div>
