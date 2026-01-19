@@ -9,11 +9,15 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-    title: 'Next.js with Tailwind CSS',
-    description: 'A boilerplate project with Next.js and Tailwind CSS',
+    title: 'trendyluxebag - Luxury Handbags Collection',
+    description: 'Discover our exclusive collection of trendy luxury handbags. Premium quality, timeless designs, and exceptional craftsmanship.',
     icons: {
         icon: [
-            { url: '/favicon.ico', type: 'image/x-icon' }
+            { url: '/favicon.ico', type: 'image/x-icon' },
+            { url: '/icon.png', type: 'image/png', sizes: '192x192' },
+        ],
+        apple: [
+            { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
         ],
     },
 };

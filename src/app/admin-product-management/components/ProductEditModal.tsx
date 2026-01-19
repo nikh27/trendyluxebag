@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/AppIcon';
 import AppImage from '@/components/ui/AppImage';
+import CloudinaryImageUpload from '@/components/common/CloudinaryImageUpload';
 import { getActiveCategories, type Category } from '@/services/categoryService';
 import { addProduct, updateProduct } from '@/services/productService';
 import type { Product } from '../types/product';
@@ -330,7 +331,7 @@ const ProductEditModal = ({
                                         htmlFor="product-price"
                                         className="block caption text-muted-foreground mb-2"
                                     >
-                                        Price (USD) *
+                                        Price (PKR) *
                                     </label>
                                     <input
                                         id="product-price"
@@ -600,54 +601,77 @@ const ProductEditModal = ({
                                 Product Images
                             </h3>
 
-                            <div className="space-y-3">
-                                <div>
-                                    <label
-                                        htmlFor="image-url"
-                                        className="block caption text-muted-foreground mb-2"
-                                    >
-                                        Image URL *
-                                    </label>
-                                    <input
-                                        id="image-url"
-                                        type="url"
-                                        value={imageUrl}
-                                        onChange={(e) => setImageUrl(e.target.value)}
-                                        className="w-full h-12 px-4 bg-input border border-border rounded-luxury font-body text-base transition-luxury focus:outline-none focus:ring-2 focus:ring-ring"
-                                        placeholder="https://example.com/image.jpg"
-                                    />
-                                    {errors.imageUrl && (
-                                        <p className="caption text-error mt-1">{errors.imageUrl}</p>
-                                    )}
-                                </div>
+                            {/* Cloudinary Upload */}
+                            <div className="p-4 bg-muted/30 rounded-luxury border border-border">
+                                <h4 className="font-body text-sm font-medium text-foreground mb-3">
+                                    Upload from Device
+                                </h4>
+                                <CloudinaryImageUpload
+                                    onImageUploaded={(url) => {
+                                        // Auto-set alt text to product name if available
+                                        const altText = formData.name || 'Product image';
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            images: [...prev.images, { url, alt: altText }],
+                                        }));
+                                    }}
+                                />
+                            </div>
 
-                                <div>
-                                    <label
-                                        htmlFor="image-alt"
-                                        className="block caption text-muted-foreground mb-2"
-                                    >
-                                        Image Alt Text *
-                                    </label>
-                                    <input
-                                        id="image-alt"
-                                        type="text"
-                                        value={imageAlt}
-                                        onChange={(e) => setImageAlt(e.target.value)}
-                                        className="w-full h-12 px-4 bg-input border border-border rounded-luxury font-body text-base transition-luxury focus:outline-none focus:ring-2 focus:ring-ring"
-                                        placeholder="Describe the image for accessibility"
-                                    />
-                                    {errors.imageAlt && (
-                                        <p className="caption text-error mt-1">{errors.imageAlt}</p>
-                                    )}
-                                </div>
+                            {/* Manual URL Input */}
+                            <div className="p-4 bg-muted/30 rounded-luxury border border-border">
+                                <h4 className="font-body text-sm font-medium text-foreground mb-3">
+                                    Or Add Image URL Manually
+                                </h4>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label
+                                            htmlFor="image-url"
+                                            className="block caption text-muted-foreground mb-2"
+                                        >
+                                            Image URL
+                                        </label>
+                                        <input
+                                            id="image-url"
+                                            type="url"
+                                            value={imageUrl}
+                                            onChange={(e) => setImageUrl(e.target.value)}
+                                            className="w-full h-12 px-4 bg-input border border-border rounded-luxury font-body text-base transition-luxury focus:outline-none focus:ring-2 focus:ring-ring"
+                                            placeholder="https://example.com/image.jpg"
+                                        />
+                                        {errors.imageUrl && (
+                                            <p className="caption text-error mt-1">{errors.imageUrl}</p>
+                                        )}
+                                    </div>
 
-                                <button
-                                    onClick={handleAddImage}
-                                    className="flex items-center gap-2 h-12 px-6 bg-muted text-foreground rounded-luxury font-body text-base font-medium transition-luxury hover:bg-muted/80"
-                                >
-                                    <Icon name="PlusIcon" size={20} />
-                                    <span>Add Image</span>
-                                </button>
+                                    <div>
+                                        <label
+                                            htmlFor="image-alt"
+                                            className="block caption text-muted-foreground mb-2"
+                                        >
+                                            Image Alt Text
+                                        </label>
+                                        <input
+                                            id="image-alt"
+                                            type="text"
+                                            value={imageAlt}
+                                            onChange={(e) => setImageAlt(e.target.value)}
+                                            className="w-full h-12 px-4 bg-input border border-border rounded-luxury font-body text-base transition-luxury focus:outline-none focus:ring-2 focus:ring-ring"
+                                            placeholder="Describe the image for accessibility"
+                                        />
+                                        {errors.imageAlt && (
+                                            <p className="caption text-error mt-1">{errors.imageAlt}</p>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        onClick={handleAddImage}
+                                        className="flex items-center gap-2 h-12 px-6 bg-muted text-foreground rounded-luxury font-body text-base font-medium transition-luxury hover:bg-muted/80"
+                                    >
+                                        <Icon name="PlusIcon" size={20} />
+                                        <span>Add Image</span>
+                                    </button>
+                                </div>
                             </div>
 
                             {errors.images && (
@@ -655,28 +679,44 @@ const ProductEditModal = ({
                             )}
 
                             {formData.images.length > 0 && (
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {formData.images.map((img, index) => (
-                                        <div
-                                            key={index}
-                                            className="relative group rounded-luxury overflow-hidden bg-muted"
-                                        >
-                                            <div className="aspect-square">
-                                                <AppImage
-                                                    src={img.url}
-                                                    alt={img.alt}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                            <button
-                                                onClick={() => handleRemoveImage(index)}
-                                                className="absolute top-2 right-2 p-2 bg-error text-error-foreground rounded-luxury opacity-0 group-hover:opacity-100 transition-luxury"
-                                                aria-label="Remove image"
+                                <div>
+                                    <h4 className="font-body text-sm font-medium text-foreground mb-3">
+                                        Uploaded Images ({formData.images.length})
+                                    </h4>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        {formData.images.map((img, index) => (
+                                            <div
+                                                key={index}
+                                                className="relative rounded-luxury overflow-hidden bg-muted border border-border"
                                             >
-                                                <Icon name="TrashIcon" size={16} />
-                                            </button>
-                                        </div>
-                                    ))}
+                                                <div className="aspect-square">
+                                                    <AppImage
+                                                        src={img.url}
+                                                        alt={img.alt}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/95 to-transparent p-2">
+                                                    <p className="text-xs text-foreground truncate">
+                                                        {img.alt}
+                                                    </p>
+                                                    {index === 0 && (
+                                                        <span className="inline-block mt-1 px-2 py-0.5 bg-accent text-accent-foreground text-xs rounded-full">
+                                                            Primary
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveImage(index)}
+                                                    className="absolute top-2 right-2 p-2 bg-error text-error-foreground rounded-luxury shadow-lg transition-transform active:scale-95 hover:scale-110"
+                                                    aria-label="Remove image"
+                                                >
+                                                    <Icon name="TrashIcon" size={16} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>

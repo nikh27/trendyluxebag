@@ -30,7 +30,7 @@ export default function HomePage() {
 
       <main className="pt-20">
         {/* Hero Section */}
-        <HeroSection onWatchLookbook={() => openVideo('https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'TrendyLuxeBag Lookbook 2026')} />
+        <HeroSection onWatchLookbook={() => openVideo('https://youtu.be/t14yFb8sca4', 'TrendyLuxeBag Lookbook 2026')} />
 
         {/* Brand Features */}
         <BrandFeatures />
